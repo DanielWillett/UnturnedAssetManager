@@ -1,0 +1,63 @@
+﻿<Window x:Class="UAM.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UAM"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="1080" Width="1920">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="1.5*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+        <TreeView x:Name="TreeView" Grid.Column="1" Grid.Row="1" SelectedItemChanged="TreeView_SelectedItemChanged"/>
+        <Grid x:Name="MainGridView" Grid.Column="0" Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="363*"/>
+                <ColumnDefinition Width="917*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="103"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <TextBox x:Name="BrowseTextBox" HorizontalAlignment="Left" Margin="107,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="410" Height="20" TabIndex="0" Grid.ColumnSpan="2" IsEnabled="False"/>
+            <TextBlock HorizontalAlignment="Left" Margin="10,12,0,0" TextWrapping="Wrap" Text="Top Level Folder: " VerticalAlignment="Top" Height="16" Width="92"/>
+            <Button x:Name="BrowseButton" Content="Browse..." HorizontalAlignment="Left" Margin="159,10,0,0" VerticalAlignment="Top" Width="59" TabIndex="1" Grid.Column="1" Click="OnBrowseButtonClicked" Height="20"/>
+            <Image x:Name="FileIcon" HorizontalAlignment="Left" Height="48" Margin="233,10,0,0" VerticalAlignment="Top" Width="48" Source="/ae64.png" Grid.Column="1" MouseUp="FileIcon_MouseUp"/>
+            <TextBlock x:Name="FileName" HorizontalAlignment="Left" Margin="286,17,0,0" TextWrapping="Wrap" Text="SL_Marker.dat" VerticalAlignment="Top" Grid.Column="1" Height="16"/>
+            <TextBlock x:Name="FilePath" HorizontalAlignment="Left" Margin="286,38,0,0" TextWrapping="Wrap" Text="C:\Program Files (x86)\Steam\steamapps\common\Unturned\Bundles\Items\Guns\" VerticalAlignment="Top" FontSize="8" Grid.Column="1" Height="11"/>
+            <TextBlock x:Name="DirPath1" HorizontalAlignment="Left" Margin="107,33,0,0" TextWrapping="NoWrap" Text="" VerticalAlignment="Top" FontSize="8" Height="11" Width="0"/>
+            <TextBlock x:Name="DirPath2" HorizontalAlignment="Left" Margin="107,0,0,0" TextWrapping="NoWrap" Text="" VerticalAlignment="Center" FontSize="8" Height="12" Width="0"/>
+            <TextBlock x:Name="DirPath3" HorizontalAlignment="Left" Margin="107,55,0,0" TextWrapping="NoWrap" Text="" VerticalAlignment="Top" FontSize="8" Height="11" Width="0"/>
+            <Button x:Name="ClearButton" Content="Clear Dirs" HorizontalAlignment="Left" Margin="159,34,0,0" VerticalAlignment="Top" Width="59" TabIndex="1" Grid.Column="1" Click="OnClearButtonClicked" Height="20"/>
+            <Button x:Name="LoadButton" Content="Load Files" HorizontalAlignment="Left" Margin="10,34,0,0" VerticalAlignment="Top" Width="59" TabIndex="1" Click="OnLoadButtonClicked" Height="20"/>
+            <ProgressBar x:Name="LoadProgressBar" HorizontalAlignment="Left" Height="7" Margin="10,71,0,0" VerticalAlignment="Top" Width="571" Grid.ColumnSpan="2" Maximum="1" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}"/>
+            <TextBlock x:Name="LoadingStatus" HorizontalAlignment="Left" Margin="10,83,0,0" TextWrapping="Wrap" Text="Idle" VerticalAlignment="Top" FontSize="8" Height="11" Width="291"/>
+            <Button x:Name="GameButton" Content="Game" HorizontalAlignment="Left" Margin="118,34,0,0" VerticalAlignment="Top" Width="36" TabIndex="1" Grid.Column="1" Click="OnGameButtonClicked" Height="20"/>
+
+        </Grid>
+        <Button x:Name="button" Grid.Column="1" Content="Load Item" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" Click="LoadItemButtonClicked" Width="71"/>
+        <TextBox x:Name="QueryTextBox" Grid.Column="1" HorizontalAlignment="Left" Margin="86,0,0,0" TextWrapping="Wrap" VerticalAlignment="Center" Width="190"/>
+        <Button x:Name="GUIDSearchButton" Grid.Column="1" Content="GUID" HorizontalAlignment="Left" Margin="281,0,0,0" VerticalAlignment="Center" Width="49" Click="OnGUIDSearchButtonClicked"/>
+        <Button x:Name="UInt16Search" Grid.Column="1" Content="UInt16" HorizontalAlignment="Left" Margin="335,0,0,0" VerticalAlignment="Center" Width="49" Click="OnUInt16SearchButtonClicked"/>
+        <ComboBox x:Name="UInt16SearchCategoryComboBox" Grid.Column="1" HorizontalAlignment="Left" Margin="389,0,0,0" VerticalAlignment="Center" Width="76" IsEditable="True" SelectedIndex="0">
+            <ComboBoxItem Content="ITEM"/>
+            <ComboBoxItem Content="EFFECT"/>
+            <ComboBoxItem Content="OBJECT"/>
+            <ComboBoxItem Content="RESOURCE"/>
+            <ComboBoxItem Content="VEHICLE"/>
+            <ComboBoxItem Content="ANIMAL"/>
+            <ComboBoxItem Content="MYTHIC"/>
+            <ComboBoxItem Content="SKIN"/>
+            <ComboBoxItem Content="SPAWN"/>
+            <ComboBoxItem Content="NPC"/>
+        </ComboBox>
+        <Button x:Name="TextSearchButton" Grid.Column="1" Content="Name" HorizontalAlignment="Left" Margin="470,0,0,0" VerticalAlignment="Center" Width="49" Click="OnNameSearchButtonClicked"/>
+    </Grid>
+</Window>
