@@ -27,7 +27,7 @@ namespace UAM
     {
         public static MainWindow? Instance;
         private CommonOpenFileDialog dlg;
-        private DirectoryInfo?[] selectedDirectories = new DirectoryInfo[4];
+        private readonly DirectoryInfo?[] selectedDirectories = new DirectoryInfo[4];
         private int paths = 0;
         public AssetTreeViewItem? selectedItem = null;
         public AssetFile? loadedItem = null;

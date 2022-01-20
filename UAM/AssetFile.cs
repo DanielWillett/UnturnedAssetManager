@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
-using System.Threading.Tasks;
 
 namespace UAM;
 
@@ -10,6 +10,7 @@ namespace UAM;
 
 public struct AssetFile
 {
+    public static CultureInfo info = new CultureInfo("en-US");
     public System.IO.FileInfo file;
     public System.IO.FileInfo? local;
     public Guid guid;
@@ -20,6 +21,7 @@ public struct AssetFile
     public StringPair[] pairs;
     public StringPair[]? localPairs;
     public bool initSuccess = false;
+    private static readonly List<string> linesList = new List<string>(32);
     public AssetFile(System.IO.FileInfo path, System.IO.FileInfo? englishPath = null)
     {
         file = path;
@@ -45,16 +47,16 @@ public struct AssetFile
             string[] lines = text.Split('\n');
             if (lines.Length != 0)
             {
-                List<string> lines2 = new List<string>(lines.Length);
+                linesList.Clear();
                 for (int i = 0; i < lines.Length; i++)
                 {
                     if (!string.IsNullOrEmpty(lines[i]))
-                        lines2.Add(lines[i].Replace("\r", string.Empty));
+                        linesList.Add(lines[i].Replace("\r", string.Empty));
                 }
-                pairs = new StringPair[lines2.Count];
-                for (int i = 0; i < lines2.Count; i++)
+                pairs = new StringPair[linesList.Count];
+                for (int i = 0; i < linesList.Count; i++)
                 {
-                    pairs[i] = new StringPair(lines2[i]);
+                    pairs[i] = new StringPair(linesList[i]);
                 }
             }
             else
@@ -121,16 +123,16 @@ public struct AssetFile
             string[] lines = text.Split('\n');
             if (lines.Length != 0)
             {
-                List<string> lines2 = new List<string>(lines.Length);
+                linesList.Clear();
                 for (int i = 0; i < lines.Length; i++)
                 {
                     if (!string.IsNullOrEmpty(lines[i]))
-                        lines2.Add(lines[i]);
+                        linesList.Add(lines[i]);
                 }
-                localPairs = new StringPair[lines2.Count];
-                for (int i = 0; i < lines2.Count; i++)
+                localPairs = new StringPair[linesList.Count];
+                for (int i = 0; i < linesList.Count; i++)
                 {
-                    localPairs[i] = new StringPair(lines2[i]);
+                    localPairs[i] = new StringPair(linesList[i]);
                 }
             }
             else
@@ -152,9 +154,11 @@ public struct AssetFile
             for (int i = 0; i < localPairs.Length; i++)
             {
                 StringPair val = localPairs[i];
-                if (val.HasValue && val.key == property)
+                if (val.key == property)
                 {
-                    return val.value;
+                    if (val.HasValue)
+                        return val.value!.Replace('\r', '\0');
+                    return null;
                 }
             }
         }
@@ -169,12 +173,32 @@ public struct AssetFile
         for (int i = 0; i < pairs.Length; i++)
         {
             StringPair val = pairs[i];
-            if (val.HasValue && val.key == property)
+            if (val.key == property)
             {
-                return val.value;
+                if (val.HasValue)
+                    return val.value!.Replace('\r', '\0');
+                return null;
             }
         }
         return null;
+    }
+    public string GetProperty(string property, string @default)
+    {
+        if (!initSuccess)
+            throw new ObjectDisposedException("This asset file failed to initialize.");
+        if (property == null)
+            throw new ArgumentNullException("Property was null", nameof(property));
+        for (int i = 0; i < pairs.Length; i++)
+        {
+            StringPair val = pairs[i];
+            if (val.key == property)
+            {
+                if (val.HasValue)
+                    return val.value!.Replace('\r', '\0');
+                return @default;
+            }
+        }
+        return @default;
     }
     public bool TryGetProperty(string property, out string value)
     {
@@ -199,7 +223,7 @@ public struct AssetFile
         string? val = GetProperty(property);
         if (val != null)
         {
-            return Enum.TryParse(val, false, out @enum);
+            return Enum.TryParse(val, true, out @enum);
         }
         @enum = default;
         return false;
@@ -209,7 +233,7 @@ public struct AssetFile
         string? val = GetProperty(property);
         if (val != null)
         {
-            return float.TryParse(val, out @float);
+            return float.TryParse(val, NumberStyles.Any, info, out @float);
         }
         @float = default;
         return false;
@@ -219,7 +243,7 @@ public struct AssetFile
         string? val = GetProperty(property);
         if (val != null)
         {
-            return int.TryParse(val, out @int);
+            return int.TryParse(val, NumberStyles.Any, info, out @int);
         }
         @int = default;
         return false;
@@ -234,6 +258,33 @@ public struct AssetFile
             if (pairs[i].key == property)
                 return true;
         return false;
+    }
+    public TEnum GetEnumType<TEnum>(string property, TEnum @default) where TEnum : struct
+    {
+        string? val = GetProperty(property);
+        if (val != null)
+        {
+            return Enum.TryParse(val, true, out TEnum @enum) ? @enum : @default;
+        }
+        else return @default;
+    }
+    public float GetFloatType(string property, float @default)
+    {
+        string? val = GetProperty(property);
+        if (val != null)
+        {
+            return float.TryParse(val, NumberStyles.Any, info, out float @float) ? @float : @default;
+        }
+        else return @default;
+    }
+    public int GetIntegerType(string property, int @default)
+    {
+        string? val = GetProperty(property);
+        if (val != null)
+        {
+            return int.TryParse(val, NumberStyles.Any, info, out int @float) ? @float : @default;
+        }
+        else return @default;
     }
 }
 
@@ -258,4 +309,5 @@ public struct StringPair
         else 
             value = null;
     }
+    public void SetValue(string? val) => value = val;
 }

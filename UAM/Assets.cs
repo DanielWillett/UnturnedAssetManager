@@ -78,10 +78,49 @@ public static class Assets
             new AssetTypeHierarchy(EAssetCategory.NPC, EAssetType.Vendor)
         };
     }
+    public static readonly Dictionary<EAssetType, EUseableType> defaultUseableTypes = new Dictionary<EAssetType, EUseableType>(36)
+        {
+            { EAssetType.Hat, EUseableType.Clothing },
+            { EAssetType.Pants, EUseableType.Clothing },
+            { EAssetType.Shirt, EUseableType.Clothing },
+            { EAssetType.Backpack, EUseableType.Clothing },
+            { EAssetType.Vest, EUseableType.Clothing },
+            { EAssetType.Mask, EUseableType.Clothing },
+            { EAssetType.Glasses, EUseableType.Clothing },
+            { EAssetType.Gun, EUseableType.Gun },
+            { EAssetType.Food, EUseableType.Consumeable },
+            { EAssetType.Water, EUseableType.Consumeable },
+            { EAssetType.Medical, EUseableType.Consumeable },
+            { EAssetType.Melee, EUseableType.Melee },
+            { EAssetType.Fuel, EUseableType.Fuel },
+            { EAssetType.Barricade, EUseableType.Barricade },
+            { EAssetType.Storage, EUseableType.Barricade },
+            { EAssetType.Tank, EUseableType.Barricade },
+            { EAssetType.Generator, EUseableType.Barricade },
+            { EAssetType.Beacon, EUseableType.Barricade },
+            { EAssetType.Farm, EUseableType.Barricade },
+            { EAssetType.Trap, EUseableType.Barricade },
+            { EAssetType.Structure, EUseableType.Structure },
+            { EAssetType.Throwable, EUseableType.Throwable },
+            { EAssetType.Grower, EUseableType.Grower },
+            { EAssetType.Optic, EUseableType.Optic },
+            { EAssetType.Refill, EUseableType.Refill },
+            { EAssetType.Fisher, EUseableType.Fisher },
+            { EAssetType.Cloud, EUseableType.Cloud },
+            { EAssetType.Arrest_Start, EUseableType.Arrest_Start },
+            { EAssetType.Arrest_End, EUseableType.Arrest_End },
+            { EAssetType.Detonator, EUseableType.Detonator },
+            { EAssetType.Charge, EUseableType.Barricade },
+            { EAssetType.Library, EUseableType.Barricade },
+            { EAssetType.Filter, EUseableType.Filter },
+            { EAssetType.Sentry, EUseableType.Barricade },
+            { EAssetType.Tire, EUseableType.Tire },
+            { EAssetType.Oil_Pump, EUseableType.Barricade }
+        };
     private static readonly EAssetType[] _unknownAssetTypeArray = new EAssetType[1] { EAssetType.UNKNOWN };
     public static EAssetType[] GetTypes(string inType, out EAssetCategory category)
     {
-        if (!Enum.TryParse(inType, false, out EAssetType child))
+        if (!Enum.TryParse(inType, true, out EAssetType child))
         {
             category = EAssetCategory.NONE;
             return _unknownAssetTypeArray;
@@ -175,7 +214,6 @@ public enum EAssetType : long
     Dialogue,
     Quest,
     Vendor
-
 }
 public enum EUseableType
 {
@@ -202,6 +240,25 @@ public enum EUseableType
     Filter,
     Carlockpick,
     Walkie_Talkie
+}
+
+public enum ESlotType
+{
+    NONE,
+    PRIMARY,
+    SECONDARY,
+    TERTIARY,
+    ANY
+}
+
+public enum EItemRarity
+{
+    COMMON,
+    UNCOMMON,
+    RARE,
+    EPIC,
+    LEGENDARY,
+    MYTHICAL
 }
 
 public enum EAssetCategory
