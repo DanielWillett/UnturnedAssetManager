@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UAM"
         mc:Ignorable="d"
-        Title="MainWindow" Height="1080" Width="1920">
+        Title="Unturned Asset Manager" Height="1080" Width="1920">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="3*"/>
@@ -49,54 +49,34 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Grid Margin="5,5,5,5" Background="SlateGray" Visibility="Collapsed">
+                <Grid x:Name ="PreviewPanel" Margin="5,5,5,5" Background="SlateGray" Visibility="Visible">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="105*"/>
+                        <RowDefinition Height="172*"/>
+                    </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0">
+                    <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Item Panel" VerticalAlignment="Top"/>
+                    <TextBlock x:Name="textBlock1" HorizontalAlignment="Left" Margin="10,31,0,0" TextWrapping="Wrap" Text="Amount:" VerticalAlignment="Top"/>
+                    <TextBox x:Name="textBox" HorizontalAlignment="Left" Margin="113,29,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="65"/>
+                    <TextBlock x:Name="textBlock1_Copy" HorizontalAlignment="Left" Margin="10,54,0,0" TextWrapping="Wrap" Text="Count:" VerticalAlignment="Top"/>
+                    <TextBox x:Name="textBox_Copy" HorizontalAlignment="Left" Margin="113,52,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="65"/>
+                    <TextBlock x:Name="textBlock1_Copy1" HorizontalAlignment="Left" Margin="183,52,0,0" TextWrapping="Wrap" Text="-" VerticalAlignment="Top"/>
+                    <TextBox x:Name="textBox_Copy1" HorizontalAlignment="Left" Margin="193,52,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="65"/>
+                    <TextBox x:Name="textBox_Copy2" HorizontalAlignment="Left" Margin="113,75,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="65"/>
+                    <TextBlock x:Name="textBlock1_Copy2" HorizontalAlignment="Left" Margin="183,75,0,0" TextWrapping="Wrap" Text="-" VerticalAlignment="Top"/>
+                    <TextBox x:Name="textBox_Copy3" HorizontalAlignment="Left" Margin="193,75,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="65"/>
+                    <TextBlock x:Name="textBlock1_Copy3" HorizontalAlignment="Left" Margin="10,76,0,0" TextWrapping="Wrap" Text="Quality:" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="checkBox" Content="Render Backwards" HorizontalAlignment="Left" Margin="113,98,0,0" VerticalAlignment="Top" Grid.RowSpan="2"/>
+                    <CheckBox x:Name="checkBox_Copy" Content="Verify Hash" HorizontalAlignment="Left" Margin="113,13,0,0" VerticalAlignment="Top" Grid.Row="1"/>
+                    <TextBlock x:Name="textBlock1_Copy4" HorizontalAlignment="Left" Margin="10,31,0,0" TextWrapping="Wrap" Text="Actions:" VerticalAlignment="Top" Grid.Column="1"/>
+                    <Button x:Name="button1" Grid.Column="1" Content="3 Actions (Edit)" HorizontalAlignment="Left" Margin="113,29,0,0" VerticalAlignment="Top" Width="215"/>
+                    <TextBlock x:Name="textBlock1_Copy5" HorizontalAlignment="Left" Margin="10,56,0,0" TextWrapping="Wrap" Text="Blueprints:" VerticalAlignment="Top" Grid.Column="1"/>
+                    <Button x:Name="button1_Copy" Grid.Column="1" Content="3 Blueprints (Edit)" HorizontalAlignment="Left" Margin="113,54,0,0" VerticalAlignment="Top" Width="215"/>
+                    <CheckBox x:Name="checkBox_Copy1" Content="Gold Item" HorizontalAlignment="Left" Margin="113,33,0,0" VerticalAlignment="Top" Foreground="#FFE2D00D" Background="White" FontWeight="Normal" Grid.Row="1"/>
 
-                    </StackPanel>
-                    <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="10,69,0,0" TextWrapping="Wrap" Text="Technical Name:" VerticalAlignment="Top"/>
-                    <TextBox HorizontalAlignment="Left" Margin="101,68,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="215"/>
-                    <TextBlock x:Name="textBlock_Copy" HorizontalAlignment="Left" Margin="10,23,0,0" TextWrapping="Wrap" Text="ID: " VerticalAlignment="Top"/>
-                    <TextBox HorizontalAlignment="Left" Margin="101,22,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="43"/>
-                    <TextBlock x:Name="textBlock_Copy1" HorizontalAlignment="Left" Margin="10,46,0,0" TextWrapping="Wrap" Text="GUID:" VerticalAlignment="Top"/>
-                    <TextBox HorizontalAlignment="Left" Margin="101,45,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="215"/>
-                    <ComboBox x:Name="cboCategory" HorizontalAlignment="Left" Margin="149,20,0,0" VerticalAlignment="Top" Width="59" IsEditable="True" SelectedIndex="0">
-                        <ComboBoxItem Content="ITEM"/>
-                        <ComboBoxItem Content="EFFECT"/>
-                        <ComboBoxItem Content="OBJECT"/>
-                        <ComboBoxItem Content="RESOURCE"/>
-                        <ComboBoxItem Content="VEHICLE"/>
-                        <ComboBoxItem Content="ANIMAL"/>
-                        <ComboBoxItem Content="MYTHIC"/>
-                        <ComboBoxItem Content="SKIN"/>
-                        <ComboBoxItem Content="SPAWN"/>
-                        <ComboBoxItem Content="NPC"/>
-                    </ComboBox>
-                    <ComboBox x:Name="cboCategory_Copy" HorizontalAlignment="Left" Margin="213,20,0,0" VerticalAlignment="Top" Width="103" IsEditable="True" SelectedIndex="0"/>
-                    <TextBlock x:Name="textBlock_Copy2" HorizontalAlignment="Left" Margin="155,2,0,0" TextWrapping="Wrap" Text="Category" VerticalAlignment="Top"/>
-                    <TextBlock x:Name="textBlock_Copy3" HorizontalAlignment="Left" Margin="252,2,0,0" TextWrapping="Wrap" Text="Type" VerticalAlignment="Top"/>
-                    <TextBlock x:Name="textBlock_Copy5" HorizontalAlignment="Left" Margin="10,23,0,0" TextWrapping="Wrap" Text="English Name:" VerticalAlignment="Top" Grid.Column="1"/>
-                    <TextBox HorizontalAlignment="Left" Margin="100,22,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="216" Grid.Column="1" Text=""/>
-                    <TextBlock x:Name="textBlock_Copy6" HorizontalAlignment="Left" Margin="10,46,0,0" TextWrapping="Wrap" Text="English Desc:" VerticalAlignment="Top" Grid.Column="1"/>
-                    <TextBox HorizontalAlignment="Left" Margin="100,45,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="216" Grid.Column="1" Height="94" Text=""/>
-                    <CheckBox Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Top" Content="Localization File" Margin="10,2,0,0"/>
-                    <CheckBox HorizontalAlignment="Left" VerticalAlignment="Top" Content="Is Useable" Margin="10,92,0,0"/>
-                    <ComboBox x:Name="cboCategory_Copy1" HorizontalAlignment="Left" Margin="101,109,0,0" VerticalAlignment="Top" Width="215" IsEditable="True" SelectedIndex="0">
-                    </ComboBox>
-                    <TextBlock x:Name="textBlock_Copy4" HorizontalAlignment="Left" Margin="10,112,0,0" TextWrapping="Wrap" Text="Useable Type: " VerticalAlignment="Top"/>
-                    <ComboBox x:Name="cboCategory_Copy2" HorizontalAlignment="Left" Margin="101,136,0,0" VerticalAlignment="Top" Width="215" IsEditable="True" SelectedIndex="0"/>
-                    <TextBlock x:Name="textBlock_Copy7" HorizontalAlignment="Left" Margin="10,139,0,0" TextWrapping="Wrap" Text="Allowed Slots: " VerticalAlignment="Top"/>
-                    <ComboBox x:Name="cboCategory_Copy3" HorizontalAlignment="Left" Margin="101,163,0,0" VerticalAlignment="Top" Width="215" IsEditable="True" SelectedIndex="0"/>
-                    <TextBlock x:Name="textBlock_Copy8" HorizontalAlignment="Left" Margin="10,166,0,0" TextWrapping="Wrap" Text="Rarity: " VerticalAlignment="Top"/>
-                    <TextBlock x:Name="textBlock_Copy9" HorizontalAlignment="Left" Margin="10,194,0,0" TextWrapping="Wrap" Text="Size: " VerticalAlignment="Top"/>
-                    <TextBox HorizontalAlignment="Left" Margin="101,190,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="40"/>
-                    <TextBlock x:Name="textBlock_Copy10" HorizontalAlignment="Left" Margin="146,191,0,0" TextWrapping="Wrap" Text="x" VerticalAlignment="Top"/>
-                    <TextBox HorizontalAlignment="Left" Margin="157,190,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="40"/>
-                    <TextBlock x:Name="textBlock_Copy11" HorizontalAlignment="Left" Margin="205,191,0,0" TextWrapping="Wrap" Text="Icon Zoom: " VerticalAlignment="Top"/>
-                    <TextBox HorizontalAlignment="Left" Margin="273,190,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="43"/>
                 </Grid>
             </Grid>
 

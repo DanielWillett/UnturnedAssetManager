@@ -215,6 +215,170 @@ public enum EAssetType : long
     Quest,
     Vendor
 }
+public enum EActionType
+{
+    BLUEPRINT,
+}
+public enum ENPCWeatherStatus
+{
+    Active,
+    Transitioning_In,
+    Fully_Transitioned_In,
+    Transitioning_Out,
+    Fully_Transitioned_Out,
+    Transitioning,
+}
+public enum ENPCOperationType
+{
+    NONE,
+    ASSIGN,
+    ADDITION,
+    SUBTRACTION,
+    MULTIPLICATION,
+    DIVISION,
+}
+public enum ENPCModificationType
+{
+    NONE,
+    ASSIGN,
+    INCREMENT,
+    DECREMENT,
+}
+public enum ENPCRewardType
+{
+    NONE,
+    EXPERIENCE,
+    REPUTATION,
+    FLAG_BOOL,
+    FLAG_SHORT,
+    FLAG_SHORT_RANDOM,
+    QUEST,
+    ITEM,
+    ITEM_RANDOM,
+    ACHIEVEMENT,
+    VEHICLE,
+    TELEPORT,
+    EVENT,
+    FLAG_MATH,
+    CURRENCY,
+    HINT,
+}
+public enum ENPCHoliday
+{
+    NONE,
+    HALLOWEEN,
+    CHRISTMAS,
+    APRIL_FOOLS,
+    MAX,
+}
+public enum EZombieSpeciality
+{
+    NONE,
+    NORMAL,
+    MEGA,
+    CRAWLER,
+    SPRINTER,
+    FLANKER_FRIENDLY,
+    FLANKER_STALK,
+    BURNER,
+    ACID,
+    BOSS_ELECTRIC,
+    BOSS_WIND,
+    BOSS_FIRE,
+    BOSS_ALL,
+    BOSS_MAGMA,
+    SPIRIT,
+    BOSS_SPIRIT,
+    BOSS_NUCLEAR,
+    DL_RED_VOLATILE,
+    DL_BLUE_VOLATILE,
+    BOSS_ELVER_STOMPER,
+}
+public enum EPlayerSkillset
+{
+    NONE,
+    FIRE,
+    POLICE,
+    ARMY,
+    FARM,
+    FISH,
+    CAMP,
+    WORK,
+    CHEF,
+    THIEF,
+    MEDIC,
+}
+public enum ENPCQuestStatus
+{
+    NONE,
+    ACTIVE,
+    READY,
+    COMPLETED,
+}
+public enum ENPCLogicType
+{
+    NONE,
+    LESS_THAN,
+    LESS_THAN_OR_EQUAL_TO,
+    EQUAL,
+    NOT_EQUAL,
+    GREATER_THAN_OR_EQUAL_TO,
+    GREATER_THAN,
+}
+public enum ENPCConditionType
+{
+    NONE,
+    EXPERIENCE,
+    REPUTATION,
+    FLAG_BOOL,
+    FLAG_SHORT,
+    QUEST,
+    SKILLSET,
+    ITEM,
+    KILLS_ZOMBIE,
+    KILLS_HORDE,
+    KILLS_ANIMAL,
+    COMPARE_FLAGS,
+    TIME_OF_DAY,
+    PLAYER_LIFE_HEALTH,
+    PLAYER_LIFE_FOOD,
+    PLAYER_LIFE_WATER,
+    PLAYER_LIFE_VIRUS,
+    HOLIDAY,
+    KILLS_PLAYER,
+    KILLS_OBJECT,
+    CURRENCY,
+    KILLS_TREE,
+    WEATHER_STATUS,
+    WEATHER_BLEND_ALPHA,
+}
+public enum EItemOrigin
+{
+    WORLD,
+    ADMIN,
+    CRAFT,
+    NATURE,
+}
+public enum EBlueprintSkill
+{
+    NONE,
+    CRAFT,
+    COOK,
+    REPAIR,
+}
+public enum EBlueprintType
+{
+    TOOL,
+    APPAREL,
+    SUPPLY,
+    GEAR,
+    AMMO,
+    BARRICADE,
+    STRUCTURE,
+    UTILITIES,
+    FURNITURE,
+    REPAIR,
+}
 public enum EUseableType
 {
     UNKNOWN,

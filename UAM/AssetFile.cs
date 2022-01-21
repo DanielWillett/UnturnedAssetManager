@@ -143,6 +143,7 @@ public struct AssetFile
     }
     public string? GetLocalName() => GetLocalProperty("Name");
     public string? GetLocalDescription() => GetLocalProperty("Description");
+    private int index = 0;
     public string? GetLocalProperty(string property)
     {
         if (!initSuccess)
@@ -170,16 +171,34 @@ public struct AssetFile
             throw new ObjectDisposedException("This asset file failed to initialize.");
         if (property == null)
             throw new ArgumentNullException("Property was null", nameof(property));
-        for (int i = 0; i < pairs.Length; i++)
+        if (index >= pairs.Length) index = pairs.Length - 1;
+        int startingIndex = index;
+        int i = index;
+        for (; i < pairs.Length; i++)
         {
             StringPair val = pairs[i];
             if (val.key == property)
             {
+                index = (i < pairs.Length - 1) ? i + 1 : 0;
                 if (val.HasValue)
                     return val.value!.Replace('\r', '\0');
                 return null;
             }
         }
+        i = 0;
+        for (; i < startingIndex; i++)
+        {
+            StringPair val = pairs[i];
+            if (val.key == property)
+            {
+                index = (i < pairs.Length - 1) ? i + 1 : 0;
+                if (val.HasValue)
+                    return val.value!.Replace('\r', '\0');
+                return null;
+            }
+        }
+
+        index = i;
         return null;
     }
     public string GetProperty(string property, string @default)
@@ -259,7 +278,7 @@ public struct AssetFile
                 return true;
         return false;
     }
-    public TEnum GetEnumType<TEnum>(string property, TEnum @default) where TEnum : struct
+    public TEnum GetEnumType<TEnum>(string property, TEnum @default = default) where TEnum : struct
     {
         string? val = GetProperty(property);
         if (val != null)
@@ -268,7 +287,7 @@ public struct AssetFile
         }
         else return @default;
     }
-    public float GetFloatType(string property, float @default)
+    public float GetFloatType(string property, float @default = default)
     {
         string? val = GetProperty(property);
         if (val != null)
@@ -277,15 +296,75 @@ public struct AssetFile
         }
         else return @default;
     }
-    public int GetIntegerType(string property, int @default)
+    public Guid GetGUIDType(string property, Guid @default = default)
     {
         string? val = GetProperty(property);
         if (val != null)
         {
-            return int.TryParse(val, NumberStyles.Any, info, out int @float) ? @float : @default;
+            return val.Length == 0 && val[0] == '0' ? Guid.Empty : (Guid.TryParse(val, out Guid guid) ? guid : @default);
         }
         else return @default;
     }
+    public int GetIntegerType(string property, int @default = default)
+    {
+        string? val = GetProperty(property);
+        if (val != null)
+        {
+            return int.TryParse(val, NumberStyles.Any, info, out int @int) ? @int : @default;
+        }
+        else return @default;
+    }
+    public uint GetUIntegerType(string property, uint @default = default)
+    {
+        string? val = GetProperty(property);
+        if (val != null)
+        {
+            return uint.TryParse(val, NumberStyles.Any, info, out uint @uint) ? @uint : @default;
+        }
+        else return @default;
+    }
+    public ushort GetUShortType(string property, ushort @default = default)
+    {
+        string? val = GetProperty(property);
+        if (val != null)
+        {
+            return ushort.TryParse(val, NumberStyles.Any, info, out ushort @ushort) ? @ushort : @default;
+        }
+        else return @default;
+    }
+    public short GetShortType(string property, short @default = default)
+    {
+        string? val = GetProperty(property);
+        if (val != null)
+        {
+            return short.TryParse(val, NumberStyles.Any, info, out short @uhort) ? @uhort : @default;
+        }
+        else return @default;
+    }
+    public byte GetByteType(string property, byte @default = default)
+    {
+        string? val = GetProperty(property);
+        if (val != null)
+        {
+            return byte.TryParse(val, NumberStyles.Any, info, out byte @byte) ? @byte : @default;
+        }
+        else return @default;
+    }
+    public bool GetBooleanType(string property, bool @default = default)
+    {
+        string? val = GetProperty(property);
+        if (val != null)
+        {
+            return val.Equals("true", StringComparison.InvariantCultureIgnoreCase) || 
+                   val == "1" ||
+                   val.Equals("y", StringComparison.InvariantCultureIgnoreCase);
+        }
+        else return @default;
+    }
+    public int GetIntegerTypeClampTo1(string property) => Math.Max(1, GetIntegerType(property, 1));
+    public int GetIntegerTypeClampTo0(string property) => Math.Max(0, GetIntegerType(property, 0));
+    public float GetFloatTypeClampTo1(string property) => Math.Max(1f, GetFloatType(property, 1f));
+    public float GetFloatTypeClampTo0(string property) => Math.Max(0f, GetFloatType(property, 0f));
 }
 
 public struct StringPair

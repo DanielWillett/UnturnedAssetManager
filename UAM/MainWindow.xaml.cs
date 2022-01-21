@@ -54,7 +54,14 @@ namespace UAM
                 NavigateToShortcut = false,
                 Title = "Select Folder"
             };
+            PreviewPanel.Visibility = Visibility.Collapsed;
+            this.Closing += OnClosing;
         }
+        private void OnClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            Application.Current.Shutdown();
+        }
+
         private void OnBrowseButtonClicked(object sender, RoutedEventArgs e)
         {
             CommonFileDialogResult result = dlg.ShowDialog();

@@ -76,26 +76,37 @@ public static class ItemLoader
         int l = 0;
         if (SelectedCategory != EAssetCategory.NONE)
         {
-            l++;
+            l += 2;
         }
         if (types != null)
         {
             l += types.Length;
         }
         Panel[] panels = new Panel[l];
+        int b = 0;
         if (SelectedCategory != EAssetCategory.NONE)
         {
+            bool a = false;
             for (int i = 0; i < AllPanels.Length; i++)
             {
                 Panel panel = AllPanels[i];
                 if (panel.types[0] == EAssetType.UNKNOWN && (panel.baseCategory == SelectedCategory || panel.baseCategory == EAssetCategory.NONE))
                 {
-                    panels[0] = AllPanels[i];
-                    break;
+                    if (!a)
+                    {
+                        panels[0] = AllPanels[i];
+                        b++;
+                        a = true;
+                    }
+                    else
+                    {
+                        panels[1] = AllPanels[i];
+                        b++;
+                        break;
+                    }
                 }
             }
         }
-        int b = 1;
         if (types != null)
         {
             for (int i = 0; i < AllPanels.Length; i++)
@@ -121,6 +132,7 @@ public static class ItemLoader
             for (int i = 0; i < loadedPanels.Length; i++)
             {
                 Panel panel = loadedPanels[i];
+                if (panel == null) break;
                 panel.grid.Visibility = Visibility.Collapsed;
                 panel.grid.IsEnabled = false;
                 MainWindow.Instance!.PanelGrid.Children.Remove(panel.grid);
@@ -152,7 +164,8 @@ public static class ItemLoader
         {
             AllPanels = new Panel[]
             {
-                new AssetPanel()
+                new AssetPanel(),
+                new ItemPanel()
             };
         }
         catch (Exception ex)
@@ -263,6 +276,27 @@ public abstract class Panel
         if (row > 0) Grid.SetRow(variable, row);
         children.Add(variable);
     }
+    protected void CreateEditorButton<TEditor, TEditorWindow>(ref TEditor variable, ref Button buttonVariable, string name, string text, double posX, double posY, double width, bool startDisabled = false, bool startCollapsed = false, int column = 0, int row = 0) where TEditor : Editor<TEditorWindow>, new() where TEditorWindow : Window, new()
+    {
+        TEditor a = new TEditor();
+        buttonVariable = new Button()
+        {
+            Name = name,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Top,
+            Content = text,
+            Width = width,
+            Margin = new Thickness(xShift + posX, yShift + posY, 0d, 0d)
+        };
+        variable = a;
+        buttonVariable.Click += (s, e) => a.Show();
+        if (startDisabled) buttonVariable.IsEnabled = false;
+        if (startCollapsed) buttonVariable.Visibility = Visibility.Collapsed;
+
+        if (column > 0) Grid.SetColumn(buttonVariable, column);
+        if (row > 0) Grid.SetRow(buttonVariable, row);
+        children.Add(buttonVariable);
+    }
     protected void CreateComboBox(ref ComboBox variable, string name, double posX, double posY, double width, bool startDisabled = false, bool startCollapsed = false, bool dropdownOnly = true, int column = 0, int row = 0)
     {
         variable = new ComboBox()
@@ -358,7 +392,7 @@ public abstract class Panel
             Grid.SetRow(grid, _y);
         }
     }
-    protected void SetOrAddKey(string key, string? value, List<StringPair> refStringPairs)
+    public static void SetOrAddKey(string key, string? value, List<StringPair> refStringPairs)
     {
         for (int i = 0; i < refStringPairs.Count; i++)
         {
@@ -370,7 +404,7 @@ public abstract class Panel
             }
         }
     }
-    protected void SelectEnum<TEnum>(TEnum @enum, ComboBox box) where TEnum : struct
+    public static void SelectEnum<TEnum>(TEnum @enum, ComboBox box) where TEnum : struct
     {
         string category = @enum.ToString();
         int i2 = -1;
@@ -414,6 +448,7 @@ public class AssetPanel : Panel
     readonly ComboBox categorySelection;
     readonly ComboBox typeSelection;
     readonly CheckBox localFileCheckBox;
+    readonly CheckBox excludeFromMBCheckBox;
     readonly TextBox localNameTxt;
     readonly TextBox localDescTxt;
     readonly TextBlock localNameLbl;
@@ -461,6 +496,9 @@ public class AssetPanel : Panel
         CreateTextBox(ref localNameTxt, nameof(localNameTxt), 100d, 22d, 216d, startDisabled: true, column: 1);
         CreateTextBox(ref localDescTxt, nameof(localDescTxt), 100d, 45d, 216d, startDisabled: true, enableWrapping: true, column: 1);
         localDescTxt.Height = 94d;
+
+        CreateCheckBox(ref excludeFromMBCheckBox, nameof(excludeFromMBCheckBox), "Exclude From Master Bundle", 10d, 235d, column: 1);
+
 
         CreateCheckBox(ref isUseableCheckBox, nameof(isUseableCheckBox), "Is Useable", 10d, 92d);
         CreateLabel(ref useableTypeLbl, nameof(useableTypeLbl), "Useable Type:", 10d, 112d, startCollapsed: true);
@@ -554,6 +592,7 @@ public class AssetPanel : Panel
         idTxt.Text = file.ID.ToString(AssetFile.info);
         guidTxt.Text = file.guid.ToString("N");
         nameTxt.Text = file.Name;
+        excludeFromMBCheckBox.IsChecked = file.HasProperty("Exclude_From_Master_Bundle");
         if (file.types.Length < 1) return;
         isBeingPopulated = true;
         if (isNewItem)
@@ -672,6 +711,98 @@ public class AssetPanel : Panel
             SetOrAddKey("Type", type.ToString(), refStringPairs);
         if (ushort.TryParse(idTxt.Text, out ushort id))
             SetOrAddKey("ID", id.ToString(), refStringPairs);
+    }
+}
+public class ItemPanel : Panel
+{
+    readonly TextBlock titleLbl;
+    readonly TextBlock amountLbl;
+    readonly TextBox amountTxt;
+    readonly TextBlock countLbl;
+    readonly TextBox countTxtMin;
+    readonly TextBlock countToLbl;
+    readonly TextBox countTxtMax;
+    readonly TextBlock qualityLbl;
+    readonly TextBox qualityTxtMin;
+    readonly TextBlock qualityToLbl;
+    readonly TextBox qualityTxtMax;
+
+    readonly CheckBox backwardsCheckbox;
+    readonly CheckBox verifyHashCheckbox;
+    readonly CheckBox canEquipCheckbox;
+    readonly CheckBox canUseUnderwater;
+    readonly CheckBox isProCheckbox;
+
+    readonly TextBlock blueprintsLbl;
+    readonly BlueprintEditor blueprintEditor;
+    readonly Button blueprintsButton;
+    private const string blueprintsButtonText = "{0} Blueprints (Edit)";
+#pragma warning disable CS8601 // Possible null reference assignment.
+    public ItemPanel() : base(EAssetCategory.ITEM)
+    {
+        grid.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(1d, GridUnitType.Star) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(1d, GridUnitType.Star) });
+
+        CreateLabel(ref titleLbl, nameof(titleLbl), "Item Panel", 10d, 10d);
+        CreateLabel(ref amountLbl, nameof(amountLbl), "Amount:", 10d, 31d);
+        CreateTextBox(ref amountTxt, nameof(amountTxt), 113d, 20d, 65d);
+        CreateLabel(ref countLbl, nameof(countLbl), "Count:", 10d, 54d);
+        CreateTextBox(ref countTxtMin, nameof(countTxtMin), 113d, 52d, 65d);
+        CreateLabel(ref countToLbl, nameof(countToLbl), "-", 183d, 52d);
+        CreateTextBox(ref countTxtMax, nameof(countTxtMax), 193d, 52d, 65d);
+        CreateLabel(ref qualityLbl, nameof(qualityLbl), "Quality:", 10d, 76d);
+        CreateTextBox(ref qualityTxtMin, nameof(qualityTxtMin), 113d, 75d, 65d);
+        CreateLabel(ref qualityToLbl, nameof(qualityToLbl), "-", 183d, 75d);
+        CreateTextBox(ref qualityTxtMax, nameof(qualityTxtMax), 193d, 75d, 65d);
+        CreateCheckBox(ref backwardsCheckbox, nameof(backwardsCheckbox), "Render Backwards", 113d, 98d);
+        CreateCheckBox(ref verifyHashCheckbox, nameof(verifyHashCheckbox), "Verify Hash", 113d, 118d);
+        CreateCheckBox(ref canEquipCheckbox, nameof(canEquipCheckbox), "Can Player Equip", 113d, 138d);
+        CreateCheckBox(ref canUseUnderwater, nameof(canUseUnderwater), "Can Use Underwater", 113d, 158d);
+        CreateCheckBox(ref isProCheckbox, nameof(isProCheckbox), "Gold Item", 113d, 178d);
+        isProCheckbox.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(226, 208, 13));
+
+        CreateLabel(ref blueprintsLbl, nameof(blueprintsLbl), "Blueprints:", 10d, 31d, column: 1);
+        CreateEditorButton<BlueprintEditor, BlueprintEditorWindow>(ref blueprintEditor, ref blueprintsButton, nameof(blueprintsButton), string.Format(blueprintsButtonText, 0), 113d, 29d, 215d, column: 1);
+
+        AddElementsToGrid();
+    }
+#pragma warning restore CS8601 // Possible null reference assignment.
+
+    public override void GetStringPairs(List<StringPair> refStringPairs, List<StringPair> refLocalStringPairs)
+    {
+
+    }
+    public override void Populate(AssetFile file, bool isNewItem)
+    {
+        amountTxt.Text = file.GetIntegerTypeClampTo1("Amount").ToString();
+        countTxtMin.Text = file.GetIntegerTypeClampTo1("Count_Min").ToString();
+        countTxtMax.Text = file.GetIntegerTypeClampTo1("Count_Max").ToString();
+        qualityTxtMin.Text = file.GetIntegerTypeClampTo1("Quality_Min").ToString();
+        qualityTxtMax.Text = file.GetIntegerTypeClampTo1("Quality_Max").ToString();
+        backwardsCheckbox.IsChecked = file.HasProperty("Backward");
+        verifyHashCheckbox.IsChecked = file.HasProperty("Should_Verify_Hash");
+        canEquipCheckbox.IsChecked = file.GetBooleanType("Can_Player_Equip", file.GetEnumType("Useable", EUseableType.UNKNOWN) != EUseableType.UNKNOWN);
+        canUseUnderwater.IsChecked = file.GetBooleanType("Can_Use_Underwater", file.GetEnumType<ESlotType>("Slot", default) != ESlotType.PRIMARY);
+        EAssetType type = file.types[0];
+        bool goldEnabled = type switch
+        {
+            EAssetType.Shirt => true,
+            EAssetType.Pants => true,
+            EAssetType.Hat => true,
+            EAssetType.Backpack => true,
+            EAssetType.Vest => true,
+            EAssetType.Mask => true,
+            EAssetType.Glasses => true,
+            EAssetType.Key => true,
+            EAssetType.Box => true,
+            _ => false
+        };
+        isProCheckbox.IsEnabled = goldEnabled;
+        isProCheckbox.Visibility = goldEnabled ? Visibility.Visible : Visibility.Collapsed;
+        isProCheckbox.IsChecked = file.HasProperty("Is_Pro");
+        int bps = file.GetIntegerTypeClampTo0("Blueprints");
+        blueprintsButton.Content = string.Format(blueprintsButtonText, bps);
+        blueprintEditor.LoadWindow(file, this);
     }
 }
 
