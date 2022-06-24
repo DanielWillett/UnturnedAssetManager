@@ -41,41 +41,116 @@
             <Button x:Name="GameButton" Content="Game" HorizontalAlignment="Left" Margin="480,34,0,0" VerticalAlignment="Top" Width="36" TabIndex="1" Click="OnGameButtonClicked" Height="20"/>
             <Grid x:Name="PanelGrid" Grid.Column="0" Grid.Row="1" Margin="10,10,10,10">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="2*"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Grid x:Name ="PreviewPanel" Margin="5,5,5,5" Background="SlateGray" Visibility="Visible">
+                <Grid x:Name ="PreviewPanel" Margin="5,5,5,5" Background="SlateGray" Visibility="Visible" Grid.ColumnSpan="2">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="105*"/>
-                        <RowDefinition Height="172*"/>
+                        <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Item Panel" VerticalAlignment="Top"/>
-                    <TextBlock x:Name="textBlock1" HorizontalAlignment="Left" Margin="10,31,0,0" TextWrapping="Wrap" Text="Amount:" VerticalAlignment="Top"/>
-                    <TextBox x:Name="textBox" HorizontalAlignment="Left" Margin="113,29,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="65"/>
-                    <TextBlock x:Name="textBlock1_Copy" HorizontalAlignment="Left" Margin="10,54,0,0" TextWrapping="Wrap" Text="Count:" VerticalAlignment="Top"/>
-                    <TextBox x:Name="textBox_Copy" HorizontalAlignment="Left" Margin="113,52,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="65"/>
-                    <TextBlock x:Name="textBlock1_Copy1" HorizontalAlignment="Left" Margin="183,52,0,0" TextWrapping="Wrap" Text="-" VerticalAlignment="Top"/>
-                    <TextBox x:Name="textBox_Copy1" HorizontalAlignment="Left" Margin="193,52,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="65"/>
-                    <TextBox x:Name="textBox_Copy2" HorizontalAlignment="Left" Margin="113,75,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="65"/>
-                    <TextBlock x:Name="textBlock1_Copy2" HorizontalAlignment="Left" Margin="183,75,0,0" TextWrapping="Wrap" Text="-" VerticalAlignment="Top"/>
-                    <TextBox x:Name="textBox_Copy3" HorizontalAlignment="Left" Margin="193,75,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="65"/>
-                    <TextBlock x:Name="textBlock1_Copy3" HorizontalAlignment="Left" Margin="10,76,0,0" TextWrapping="Wrap" Text="Quality:" VerticalAlignment="Top"/>
-                    <CheckBox x:Name="checkBox" Content="Render Backwards" HorizontalAlignment="Left" Margin="113,98,0,0" VerticalAlignment="Top" Grid.RowSpan="2"/>
-                    <CheckBox x:Name="checkBox_Copy" Content="Verify Hash" HorizontalAlignment="Left" Margin="113,13,0,0" VerticalAlignment="Top" Grid.Row="1"/>
-                    <TextBlock x:Name="textBlock1_Copy4" HorizontalAlignment="Left" Margin="10,31,0,0" TextWrapping="Wrap" Text="Actions:" VerticalAlignment="Top" Grid.Column="1"/>
-                    <Button x:Name="button1" Grid.Column="1" Content="3 Actions (Edit)" HorizontalAlignment="Left" Margin="113,29,0,0" VerticalAlignment="Top" Width="215"/>
-                    <TextBlock x:Name="textBlock1_Copy5" HorizontalAlignment="Left" Margin="10,56,0,0" TextWrapping="Wrap" Text="Blueprints:" VerticalAlignment="Top" Grid.Column="1"/>
-                    <Button x:Name="button1_Copy" Grid.Column="1" Content="3 Blueprints (Edit)" HorizontalAlignment="Left" Margin="113,54,0,0" VerticalAlignment="Top" Width="215"/>
-                    <CheckBox x:Name="checkBox_Copy1" Content="Gold Item" HorizontalAlignment="Left" Margin="113,33,0,0" VerticalAlignment="Top" Foreground="#FFE2D00D" Background="White" FontWeight="Normal" Grid.Row="1"/>
+                    <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Weapon Panel" VerticalAlignment="Top"/>
+                    <TextBlock x:Name="textBlock1" HorizontalAlignment="Left" Margin="72,31,0,0" TextWrapping="Wrap" Text="Range" VerticalAlignment="Top"/>
+                    <TextBox x:Name="textBox" HorizontalAlignment="Left" Margin="113,30,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="102"/>
+                    <TextBlock x:Name="textBlock3" HorizontalAlignment="Left" Margin="74,52,0,0" TextWrapping="Wrap" Text="Player Effects" VerticalAlignment="Top"/>
+                    <Grid Margin="10,73,10,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" HorizontalAlignment="Right" TextWrapping="Wrap" Text="Overall" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Grid.Row="1" HorizontalAlignment="Right" TextWrapping="Wrap" Text="Leg Multiplier" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Grid.Row="2" HorizontalAlignment="Right" TextWrapping="Wrap" Text="Arm Multiplier" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Grid.Row="3" HorizontalAlignment="Right" TextWrapping="Wrap" Text="Spine Multiplier" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Grid.Row="4" HorizontalAlignment="Right" TextWrapping="Wrap" Text="Skull Multiplier" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Grid.Row="5" HorizontalAlignment="Right" TextWrapping="Wrap" Text="Food Damage" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Grid.Row="6" HorizontalAlignment="Right" TextWrapping="Wrap" Text="Water Damage" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Grid.Row="7" HorizontalAlignment="Right" TextWrapping="Wrap" Text="Virus Damage" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Grid.Row="8" HorizontalAlignment="Right" TextWrapping="Wrap" Text="Hallucination" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Grid.Row="9" HorizontalAlignment="Right" TextWrapping="Wrap" Text="Bleeding Type" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Grid.Row="10" HorizontalAlignment="Right" TextWrapping="Wrap" Text="Bone Break Type" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBox Grid.Row="0" Grid.Column="1"/>
+                        <TextBox Grid.Row="1" Grid.Column="1"/>
+                        <TextBox Grid.Row="2" Grid.Column="1"/>
+                        <TextBox Grid.Row="3" Grid.Column="1"/>
+                        <TextBox Grid.Row="4" Grid.Column="1"/>
+                        <TextBox Grid.Row="5" Grid.Column="1"/>
+                        <TextBox Grid.Row="6" Grid.Column="1"/>
+                        <TextBox Grid.Row="7" Grid.Column="1"/>
+                        <TextBox Grid.Row="8" Grid.Column="1"/>
+                        <ComboBox Grid.Row="9" Grid.Column="1"/>
+                        <ComboBox Grid.Row="10" Grid.Column="1"/>
+                    </Grid>
+                    <TextBlock Grid.Column="1" HorizontalAlignment="Left" Margin="74,52,0,0" TextWrapping="Wrap" Text="Zombie Effects" VerticalAlignment="Top"/>
+                    <Grid Grid.Column="1" Margin="10,73,10,116">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" HorizontalAlignment="Right" TextWrapping="Wrap" Text="Overall" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Grid.Row="1" HorizontalAlignment="Right" TextWrapping="Wrap" Text="Leg Multiplier" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Grid.Row="2" HorizontalAlignment="Right" TextWrapping="Wrap" Text="Arm Multiplier" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Grid.Row="3" HorizontalAlignment="Right" TextWrapping="Wrap" Text="Spine Multiplier" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Grid.Row="4" HorizontalAlignment="Right" TextWrapping="Wrap" Text="Skull Multiplier" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBox Grid.Row="0" Grid.Column="1"/>
+                        <TextBox Grid.Row="1" Grid.Column="1"/>
+                        <TextBox Grid.Row="2" Grid.Column="1"/>
+                        <TextBox Grid.Row="3" Grid.Column="1"/>
+                        <TextBox Grid.Row="4" Grid.Column="1"/>
+                    </Grid>
+                    <TextBlock Grid.Column="1" HorizontalAlignment="Left" Margin="74,169,0,0" TextWrapping="Wrap" Text="Animal Effects" VerticalAlignment="Top"/>
+                    <Grid Grid.Column="1" Margin="10,190,10,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" HorizontalAlignment="Right" TextWrapping="Wrap" Text="Overall" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Grid.Row="1" HorizontalAlignment="Right" TextWrapping="Wrap" Text="Leg Multiplier" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Grid.Row="2" HorizontalAlignment="Right" TextWrapping="Wrap" Text="Arm Multiplier" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Grid.Row="3" HorizontalAlignment="Right" TextWrapping="Wrap" Text="Spine Multiplier" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBox Grid.Row="0" Grid.Column="1"/>
+                        <TextBox Grid.Row="1" Grid.Column="1"/>
+                        <TextBox Grid.Row="2" Grid.Column="1"/>
+                        <TextBox Grid.Row="3" Grid.Column="1"/>
+                    </Grid>
+                    <TextBlock x:Name="textBlock1_Copy4" HorizontalAlignment="Left" Margin="10,30,0,0" TextWrapping="Wrap" Text="Blades:" VerticalAlignment="Top" Grid.Column="1"/>
+                    <Button x:Name="button1" Grid.Column="1" Content="0 Blades (Edit)" HorizontalAlignment="Left" Margin="74,28,0,0" VerticalAlignment="Top" Width="138"/>
 
                 </Grid>
             </Grid>

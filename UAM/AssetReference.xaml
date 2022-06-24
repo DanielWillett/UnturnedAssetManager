@@ -1,0 +1,37 @@
+﻿<UserControl x:Class="UAM.AssetReference"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:UAM"
+             mc:Ignorable="d" d:DesignWidth="215" Height="58">
+    <UserControl.Resources>
+        <Color x:Key="SelectedButtonColor">#FFC0C8B3</Color>
+        <Color x:Key="DeselectedButtonColor">#FFDDDDDD</Color>
+    </UserControl.Resources>
+    <StackPanel MouseWheel="OnScrollScrollViewer">
+        <TextBox x:Name="txtEntryBox" DockPanel.Dock="Top" TextChanged="txtEntryBox_TextChanged" />
+        <DockPanel>
+            <Grid DockPanel.Dock="Bottom">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Button x:Name="btnGUID" Content="GUID" Grid.Column="0" Click="OnSelectorClicked"/>
+                <Button x:Name="btnName" Content="Name" Grid.Column="1" Click="OnSelectorClicked">
+                    <Button.Background>
+                        <SolidColorBrush Color="{DynamicResource SelectedButtonColor}"/>
+                    </Button.Background>
+                </Button>
+                <Button x:Name="btnUInt16" Content="UInt16" Grid.Column="2" Click="OnSelectorClicked"/>
+            </Grid>
+            <Button DockPanel.Dock="Left" Content="&lt;" Background="#FFCEFDFA" Click="LeftScrollButtonClicked"/>
+            <Button DockPanel.Dock="Right" Content="&gt;" Background="#FFCEFDFA" Click="RightScrollButtonClicked"/>
+            <ScrollViewer x:Name="ScrollViewerOptions" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" Width="190.58">
+                <StackPanel x:Name="OptionsStack" Orientation="Horizontal" DockPanel.Dock="Top">
+                </StackPanel>
+            </ScrollViewer>
+        </DockPanel>
+    </StackPanel>
+</UserControl>

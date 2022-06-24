@@ -163,7 +163,7 @@ namespace UAM
                             }
                         }
                         if (processedFiles % 25 == 0)
-                            ReportProgress((processedFiles / totalFilesf) * 0.85f + 0.1f, "Reading file " + file.Name);
+                            ReportProgress(processedFiles / totalFilesf * 0.85f + 0.1f, "Reading file " + file.Name);
 
                         AssetFile f = new AssetFile(file, local);
                         if (f.initSuccess)
@@ -328,12 +328,12 @@ namespace UAM
 
         private void FileIcon_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (loadedItem.HasValue)
+            if (loadedItem is not null)
             {
                 using Process fileopener = new Process();
 
                 fileopener.StartInfo.FileName = "explorer";
-                fileopener.StartInfo.Arguments = "\"" + loadedItem.Value.file + "\"";
+                fileopener.StartInfo.Arguments = "\"" + loadedItem.file + "\"";
                 fileopener.Start();
             }
         }

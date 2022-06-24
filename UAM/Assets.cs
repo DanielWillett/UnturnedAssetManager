@@ -148,7 +148,7 @@ public static class Assets
     }
 }
 
-public enum EAssetType : long
+public enum EAssetType
 {
     UNKNOWN,
     Hat,
@@ -440,6 +440,35 @@ public enum EAssetCategory
     NPC
 }
 
+/// <summary>
+/// SDG.Unturned.DamagePlayerParameters.Bleeding
+/// </summary>
+public enum EBleedingType
+{
+    Default,
+    Always,
+    Never,
+    Heal,
+}
+
+/// <summary>
+/// SDG.Unturned.DamagePlayerParameters.Bones
+/// </summary>
+public enum EBreakType
+{
+    None,
+    Always,
+    Heal,
+}
+/// <summary>
+/// SDG.Unturned.EZombieStunOverride
+/// </summary>
+public enum EZombieStunOverride
+{
+    None,
+    Never,
+    Always,
+}
 public struct AssetTypeHierarchy
 {
     public EAssetCategory category;

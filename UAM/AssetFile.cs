@@ -8,9 +8,9 @@ namespace UAM;
 
 #nullable enable
 
-public struct AssetFile
+public class AssetFile
 {
-    public static CultureInfo info = new CultureInfo("en-US");
+    public static CultureInfo Locale = new CultureInfo("en-US");
     public System.IO.FileInfo file;
     public System.IO.FileInfo? local;
     public Guid guid;
@@ -71,17 +71,17 @@ public struct AssetFile
         
         for (int i = 0; i < pairs.Length; i++)
         {
-            if (pairs[i].key == "Type")
+            if (pairs[i].key.Equals("Type", StringComparison.OrdinalIgnoreCase))
             {
                 if (!pairs[i].HasValue) break;
-                types = Assets.GetTypes(pairs[i].value, out category);
+                types = Assets.GetTypes(pairs[i].value!, out category);
             }
-            else if (pairs[i].key == "GUID")
+            else if (pairs[i].key.Equals("GUID", StringComparison.OrdinalIgnoreCase))
             {
                 if (!pairs[i].HasValue || !Guid.TryParse(pairs[i].value, out guid)) break;
                 fguid = true;
             }
-            else if (pairs[i].key == "ID")
+            else if (pairs[i].key.Equals("ID", StringComparison.OrdinalIgnoreCase))
             {
                 if (!pairs[i].HasValue || !ushort.TryParse(pairs[i].value, out ID)) break;
                 fid = true;
@@ -155,7 +155,7 @@ public struct AssetFile
             for (int i = 0; i < localPairs.Length; i++)
             {
                 StringPair val = localPairs[i];
-                if (val.key == property)
+                if (val.key.Equals(property, StringComparison.OrdinalIgnoreCase))
                 {
                     if (val.HasValue)
                         return val.value!.Replace('\r', '\0');
@@ -177,7 +177,7 @@ public struct AssetFile
         for (; i < pairs.Length; i++)
         {
             StringPair val = pairs[i];
-            if (val.key == property)
+            if (val.key.Equals(property, StringComparison.OrdinalIgnoreCase))
             {
                 index = (i < pairs.Length - 1) ? i + 1 : 0;
                 if (val.HasValue)
@@ -189,7 +189,7 @@ public struct AssetFile
         for (; i < startingIndex; i++)
         {
             StringPair val = pairs[i];
-            if (val.key == property)
+            if (val.key.Equals(property, StringComparison.OrdinalIgnoreCase))
             {
                 index = (i < pairs.Length - 1) ? i + 1 : 0;
                 if (val.HasValue)
@@ -210,7 +210,7 @@ public struct AssetFile
         for (int i = 0; i < pairs.Length; i++)
         {
             StringPair val = pairs[i];
-            if (val.key == property)
+            if (val.key.Equals(property, StringComparison.OrdinalIgnoreCase))
             {
                 if (val.HasValue)
                     return val.value!.Replace('\r', '\0');
@@ -228,7 +228,7 @@ public struct AssetFile
         for (int i = 0; i < pairs.Length; i++)
         {
             StringPair val = pairs[i];
-            if (val.HasValue && val.key == property)
+            if (val.HasValue && val.key.Equals(property, StringComparison.OrdinalIgnoreCase))
             {
                 value = val.value!;
                 return true;
@@ -252,7 +252,7 @@ public struct AssetFile
         string? val = GetProperty(property);
         if (val != null)
         {
-            return float.TryParse(val, NumberStyles.Any, info, out @float);
+            return float.TryParse(val, NumberStyles.Any, Locale, out @float);
         }
         @float = default;
         return false;
@@ -262,7 +262,7 @@ public struct AssetFile
         string? val = GetProperty(property);
         if (val != null)
         {
-            return int.TryParse(val, NumberStyles.Any, info, out @int);
+            return int.TryParse(val, NumberStyles.Any, Locale, out @int);
         }
         @int = default;
         return false;
@@ -274,7 +274,7 @@ public struct AssetFile
         if (property == null)
             throw new ArgumentNullException("Property was null", nameof(property));
         for (int i = 0; i < pairs.Length; i++)
-            if (pairs[i].key == property)
+            if (pairs[i].key.Equals(property, StringComparison.OrdinalIgnoreCase))
                 return true;
         return false;
     }
@@ -292,7 +292,7 @@ public struct AssetFile
         string? val = GetProperty(property);
         if (val != null)
         {
-            return float.TryParse(val, NumberStyles.Any, info, out float @float) ? @float : @default;
+            return float.TryParse(val, NumberStyles.Any, Locale, out float @float) ? @float : @default;
         }
         else return @default;
     }
@@ -310,7 +310,7 @@ public struct AssetFile
         string? val = GetProperty(property);
         if (val != null)
         {
-            return int.TryParse(val, NumberStyles.Any, info, out int @int) ? @int : @default;
+            return int.TryParse(val, NumberStyles.Any, Locale, out int @int) ? @int : @default;
         }
         else return @default;
     }
@@ -319,7 +319,7 @@ public struct AssetFile
         string? val = GetProperty(property);
         if (val != null)
         {
-            return uint.TryParse(val, NumberStyles.Any, info, out uint @uint) ? @uint : @default;
+            return uint.TryParse(val, NumberStyles.Any, Locale, out uint @uint) ? @uint : @default;
         }
         else return @default;
     }
@@ -328,7 +328,7 @@ public struct AssetFile
         string? val = GetProperty(property);
         if (val != null)
         {
-            return ushort.TryParse(val, NumberStyles.Any, info, out ushort @ushort) ? @ushort : @default;
+            return ushort.TryParse(val, NumberStyles.Any, Locale, out ushort @ushort) ? @ushort : @default;
         }
         else return @default;
     }
@@ -337,7 +337,7 @@ public struct AssetFile
         string? val = GetProperty(property);
         if (val != null)
         {
-            return short.TryParse(val, NumberStyles.Any, info, out short @uhort) ? @uhort : @default;
+            return short.TryParse(val, NumberStyles.Any, Locale, out short @uhort) ? @uhort : @default;
         }
         else return @default;
     }
@@ -346,7 +346,7 @@ public struct AssetFile
         string? val = GetProperty(property);
         if (val != null)
         {
-            return byte.TryParse(val, NumberStyles.Any, info, out byte @byte) ? @byte : @default;
+            return byte.TryParse(val, NumberStyles.Any, Locale, out byte @byte) ? @byte : @default;
         }
         else return @default;
     }
@@ -365,6 +365,22 @@ public struct AssetFile
     public int GetIntegerTypeClampTo0(string property) => Math.Max(0, GetIntegerType(property, 0));
     public float GetFloatTypeClampTo1(string property) => Math.Max(1f, GetFloatType(property, 1f));
     public float GetFloatTypeClampTo0(string property) => Math.Max(0f, GetFloatType(property, 0f));
+    public override bool Equals(object obj) => obj is AssetFile file && file == this;
+    public override int GetHashCode() => guid.GetHashCode();
+    public override string ToString() => $"Asset File: {guid:N} - {Name} - {category}{(types.Length > 0 ? "::" + types[0].ToString() : string.Empty)} - {ID}";
+    public static bool operator ==(AssetFile? a, AssetFile? b)
+    {
+        if (a is null)
+        {
+            return b is null;
+        }
+        else if (b is null)
+        {
+            return false;
+        }
+        return a.guid == b.guid;
+    }
+    public static bool operator !=(AssetFile? a, AssetFile? b) => !(a == b);
 }
 
 public struct StringPair
@@ -374,13 +390,14 @@ public struct StringPair
     public bool HasValue => value != null;
     public StringPair(string key, string? value = null)
     {
-        this.key = key;
+        this.key = key ?? throw new ArgumentException("Line is null", nameof(key));
         this.value = value;
     }
+    private static readonly char[] separator = new char[1] { ' ' };
     public StringPair(string line)
     {
-        if (line == null) throw new ArgumentException("Line is null", nameof(line));
-        string[] parts = line.Split(new char[1] { ' ' }, 2);
+        if (line is null) throw new ArgumentException("Line is null", nameof(line));
+        string[] parts = line.Split(separator, 2);
         if (parts.Length == 0) throw new ArgumentException("Line has no text", nameof(line));
         key = parts[0];
         if (parts.Length > 1)
@@ -388,5 +405,4 @@ public struct StringPair
         else 
             value = null;
     }
-    public void SetValue(string? val) => value = val;
 }

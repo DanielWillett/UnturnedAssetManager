@@ -31,8 +31,8 @@ public abstract class Editor<T> where T : Window, new()
 }
 public class BlueprintEditor : Editor<BlueprintEditorWindow>
 {
-    public List<BlueprintData> Blueprints;
-    public List<ActionData> Actions;
+    public List<BlueprintData> Blueprints = null!;
+    public List<ActionData> Actions = null!;
     public BlueprintEditor() : base()
     {
 

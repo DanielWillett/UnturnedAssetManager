@@ -26,39 +26,49 @@ public partial class Blueprint : UserControl
         InitializeComponent();
         AddSupplyButton.Click += OnAddSupplyClicked;
         AddOutputButton.Click += OnAddOutputClicked;
+        AddConditionButton.Click += OnAddConditionClicked;
+        AddRewardButton.Click += OnAddRewardClicked;
     }
     
     private void OnAddSupplyClicked(object sender, RoutedEventArgs e)
     {
-        AddSupply(EMPTY_SUPPLY_DATA, supplyControls.Count);
+        AddSupply(-1, supplyControls.Count);
     }
     private void OnAddOutputClicked(object sender, RoutedEventArgs e)
     {
-        AddOutput(EMPTY_OUTPUT_DATA, outputControls.Count);
+        AddOutput(-1, outputControls.Count);
+    }
+    private void OnAddConditionClicked(object sender, RoutedEventArgs e)
+    {
+        AddCondition(-1, conditionControls.Count);
+    }
+    private void OnAddRewardClicked(object sender, RoutedEventArgs e)
+    {
+        AddReward(-1, conditionControls.Count);
     }
 
-    private static readonly EItemOrigin[]       ORIGIN_VALUES       = Enum.GetValues(typeof(EItemOrigin)).OfType<EItemOrigin>().OrderBy(x => (int)x.ToString()[0]).ToArray();
-    private static readonly ENPCLogicType[]     LOGIC_VALUES        = Enum.GetValues(typeof(ENPCLogicType)).OfType<ENPCLogicType>().OrderBy(x => (int)x.ToString()[0]).ToArray();
-    private static readonly ENPCConditionType[] CONDITIONS_VALUES   = Enum.GetValues(typeof(ENPCConditionType)).OfType<ENPCConditionType>().OrderBy(x => (int)x.ToString()[0]).ToArray();
-    private static readonly ENPCRewardType[]    REWARD_VALUES       = Enum.GetValues(typeof(ENPCRewardType)).OfType<ENPCRewardType>().OrderBy(x => (int)x.ToString()[0]).ToArray();
+    private static readonly EItemOrigin[]       ORIGIN_VALUES       = Enum.GetValues(typeof(EItemOrigin))       .OfType<EItemOrigin>()      .OrderBy(x => (int)x.ToString()[0]).ToArray();
+    private static readonly ENPCLogicType[]     LOGIC_VALUES        = Enum.GetValues(typeof(ENPCLogicType))     .OfType<ENPCLogicType>()    .OrderBy(x => (int)x.ToString()[0]).ToArray();
+    private static readonly ENPCConditionType[] CONDITIONS_VALUES   = Enum.GetValues(typeof(ENPCConditionType)) .OfType<ENPCConditionType>().OrderBy(x => (int)x.ToString()[0]).ToArray();
+    private static readonly ENPCRewardType[]    REWARD_VALUES       = Enum.GetValues(typeof(ENPCRewardType))    .OfType<ENPCRewardType>()   .OrderBy(x => (int)x.ToString()[0]).ToArray();
 
-    private static readonly BlueprintData.SupplyData    EMPTY_SUPPLY_DATA     = new BlueprintData.SupplyData(0, 0, false);
-    private static readonly BlueprintData.OutputData    EMPTY_OUTPUT_DATA     = new BlueprintData.OutputData(0, 0, EItemOrigin.CRAFT);
-    private static readonly BlueprintData.NPCCondition  EMPTY_CONDITION_DATA  = new BlueprintData.NPCCondition(ENPCConditionType.NONE, null, true, ENPCLogicType.NONE, null);
-    private static readonly BlueprintData.NPCReward     EMPTY_REWARD_DATA     = new BlueprintData.NPCReward(ENPCRewardType.NONE, null, null);
+    private BlueprintData data;
 
     private static readonly GridLength smlLen   = new GridLength(50d, GridUnitType.Pixel);
-    private static readonly GridLength lrgLen   = new GridLength(130d, GridUnitType.Pixel);
+    private static readonly GridLength lrgLen   = new GridLength(260d, GridUnitType.Pixel);
     private static readonly GridLength strLen   = new GridLength(1d, GridUnitType.Star);
     private static readonly GridLength valGrid1 = new GridLength(2d, GridUnitType.Star);
     private static readonly GridLength valGrid2 = new GridLength(3d, GridUnitType.Star);
 
-    private readonly List<SupplyControls> supplyControls = new List<SupplyControls>();
-    private readonly List<OutputControls> outputControls = new List<OutputControls>();
+    private readonly List<SupplyControls> supplyControls        = new List<SupplyControls>(4);
+    private readonly List<OutputControls> outputControls        = new List<OutputControls>(4);
+    private readonly List<ConditionControls> conditionControls  = new List<ConditionControls>(4);
+    private readonly List<RewardControls> rewardControls        = new List<RewardControls>(4);
 
     private struct SupplyControls
     {
         public int index;
+        public int supplyIndex;
         public StackPanel leftHost;
         public Button removeButton;
         public TextBlock number;
@@ -73,6 +83,7 @@ public partial class Blueprint : UserControl
     private struct OutputControls
     {
         public int index;
+        public int outputIndex;
         public StackPanel leftHost;
         public Button removeButton;
         public TextBlock number;
@@ -84,13 +95,69 @@ public partial class Blueprint : UserControl
         public TextBox quantityTxt;
         public ComboBox originCbo;
     }
+    private struct ConditionControls
+    {
+        public int index;
+        public int conditionIndex;
+        public StackPanel leftHost;
+        public Button removeButton;
+        public TextBlock number;
+        public Grid valuesGrid;
+        public TextBlock typeLbl;
+        public TextBlock localKeyLbl;
+        public TextBlock shouldResetLbl;
+        public TextBlock logicTypeLbl;
+        public TextBox localKeyTxt;
+        public CheckBox shouldResetChk;
+        public ComboBox typeCbo;
+        public ComboBox logicTypeCbo;
+        public List<FrameworkElement> extra;
+        public BlueprintData.NPCCondition.NPCConditionData? conditionDataPending;
+    }
+    private struct RewardControls
+    {
+        public int index;
+        public int rewardIndex;
+        public StackPanel leftHost;
+        public Button removeButton;
+        public TextBlock number;
+        public Grid valuesGrid;
+        public TextBlock typeLbl;
+        public TextBlock localKeyLbl;
+        public TextBox localKeyTxt;
+        public ComboBox typeCbo;
+        public List<FrameworkElement> extra;
+    }
+    public void LoadBlueprint(BlueprintData data, int index)
+    {
+        this.data = data;
+        Title.Text = "Blueprint #" + (index + 1).ToString();
+        SuppliesTabGrid.RowDefinitions.Clear();
+        for (int i = 0; i < this.data.Supplies.Count; i++)
+            AddSupply(i, i);
+        SuppliesTabGrid.RowDefinitions.Add(new RowDefinition() { Height = strLen });
+
+        OutputsTabGrid.RowDefinitions.Clear();
+        for (int i = 0; i < this.data.Outputs.Count; i++)
+            AddOutput(i, i);
+        OutputsTabGrid.RowDefinitions.Add(new RowDefinition() { Height = strLen });
+
+        ConditionsTabGrid.RowDefinitions.Clear();
+        for (int i = 0; i < this.data.Conditions.Count; i++)
+            AddCondition(i, i);
+        ConditionsTabGrid.RowDefinitions.Add(new RowDefinition() { Height = strLen });
+    }
 
     private const string CRITICAL_TOOLTIP = "Marks this supply as required for the recipe to show up.";
-    private void AddSupply(BlueprintData.SupplyData data, int index)
+
+    private void AddSupply(int supplyIndex, int index)
     {
         SuppliesTabGrid.RowDefinitions.Insert(0, new RowDefinition() { Height = smlLen });
         Grid.SetRow(AddSupplyButton, this.supplyControls.Count + 1);
-        SupplyControls supplyControls = new SupplyControls() { index = index };
+        SupplyControls supplyControls = new SupplyControls() { index = index, supplyIndex = -1 };
+        BlueprintData.SupplyData supplyData = default;
+        if (supplyIndex > -1 && supplyIndex < this.data.Supplies.Count)
+            supplyData = this.data.Supplies[supplyIndex];
         supplyControls.leftHost = new StackPanel()
         {
             Orientation = Orientation.Horizontal,
@@ -98,6 +165,7 @@ public partial class Blueprint : UserControl
             VerticalAlignment = VerticalAlignment.Center,
         };
         Grid.SetRow(supplyControls.leftHost, index);
+        Grid.SetColumn(supplyControls.leftHost, 0);
         supplyControls.removeButton = new Button()
         {
             Content = "Remove",
@@ -122,7 +190,6 @@ public partial class Blueprint : UserControl
         supplyControls.valuesGrid.RowDefinitions.Add(new RowDefinition() { Height = strLen });
         supplyControls.valuesGrid.RowDefinitions.Add(new RowDefinition() { Height = strLen });
         supplyControls.valuesGrid.RowDefinitions.Add(new RowDefinition() { Height = strLen });
-        Grid.SetColumnSpan(supplyControls.valuesGrid, 1);
         Grid.SetColumn(supplyControls.valuesGrid, 1);
         Grid.SetRow(supplyControls.valuesGrid, index);
         supplyControls.idLbl = new TextBlock()
@@ -146,7 +213,7 @@ public partial class Blueprint : UserControl
         };
         Grid.SetRow(supplyControls.isCriticalLbl, 2);
         supplyControls.valuesGrid.Children.Add(supplyControls.isCriticalLbl);
-        bool isVal = data.ID != 0;
+        bool isVal = supplyData.ID != 0;
         supplyControls.idTxt = new TextBox();
         Grid.SetColumn(supplyControls.idTxt, 1);
         supplyControls.valuesGrid.Children.Add(supplyControls.idTxt);
@@ -162,9 +229,9 @@ public partial class Blueprint : UserControl
         Grid.SetRow(supplyControls.criticalChk, 2);
         if (isVal)
         {
-            supplyControls.idTxt.Text = data.ID.ToString(AssetFile.info);
-            supplyControls.quantityTxt.Text = data.Amount.ToString(AssetFile.info);
-            supplyControls.criticalChk.IsChecked = data.Critical;
+            supplyControls.idTxt.Text = supplyData.ID.ToString(AssetFile.Locale);
+            supplyControls.quantityTxt.Text = supplyData.Amount.ToString(AssetFile.Locale);
+            supplyControls.criticalChk.IsChecked = supplyData.Critical;
         }
         supplyControls.valuesGrid.Children.Add(supplyControls.criticalChk);
         SuppliesTabGrid.Children.Add(supplyControls.valuesGrid);
@@ -202,11 +269,16 @@ public partial class Blueprint : UserControl
             }
         }
     }
-    private void AddOutput(BlueprintData.OutputData data, int index)
+    private void AddOutput(int outputIndex, int index)
     {
         OutputsTabGrid.RowDefinitions.Insert(0, new RowDefinition() { Height = smlLen });
         Grid.SetRow(AddOutputButton, this.outputControls.Count + 1);
-        OutputControls outputControls = new OutputControls() { index = index };
+        OutputControls outputControls = new OutputControls() { index = index, outputIndex = outputIndex };
+
+        BlueprintData.OutputData outputData = default;
+        if (outputIndex > -1 && outputIndex < this.data.Outputs.Count)
+            outputData = this.data.Outputs[outputIndex];
+
         outputControls.leftHost = new StackPanel()
         {
             Orientation = Orientation.Horizontal,
@@ -286,12 +358,12 @@ public partial class Blueprint : UserControl
         outputControls.originCbo.SelectedIndex = craftIndex;
         Grid.SetColumn(outputControls.originCbo, 1);
         Grid.SetRow(outputControls.originCbo, 2);
-        bool isVal = data.ID != 0;
+        bool isVal = outputData.ID != 0;
         if (isVal)
         {
-            outputControls.idTxt.Text = data.ID.ToString(AssetFile.info);
-            outputControls.quantityTxt.Text = data.Amount.ToString(AssetFile.info);
-            Panel.SelectEnum(data.Origin, outputControls.originCbo);
+            outputControls.idTxt.Text = outputData.ID.ToString(AssetFile.Locale);
+            outputControls.quantityTxt.Text = outputData.Amount.ToString(AssetFile.Locale);
+            Panel.SelectEnum(outputData.Origin, outputControls.originCbo);
         }
         outputControls.valuesGrid.Children.Add(outputControls.originCbo);
         OutputsTabGrid.Children.Add(outputControls.valuesGrid);
@@ -328,20 +400,348 @@ public partial class Blueprint : UserControl
             }
         }
     }
-    public void LoadBlueprint(BlueprintData data, int index)
-    {
-        Title.Text = "Blueprint #" + (index + 1).ToString();
-        SuppliesTabGrid.ColumnDefinitions.Clear();
-        for (int i = 0; i < data.Supplies.Count; i++)
-            AddSupply(data.Supplies[i], i);
-        SuppliesTabGrid.ColumnDefinitions.Add(new ColumnDefinition() { Width = strLen });
 
-        OutputsTabGrid.ColumnDefinitions.Clear();
-        for (int i = 0; i < data.Outputs.Count; i++)
-            AddOutput(data.Outputs[i], i);
-        OutputsTabGrid.ColumnDefinitions.Add(new ColumnDefinition() { Width = strLen });
+    private const string RESET_TOOLTIP = "Allows the condition to be reset after reaching it.";
+    private void AddCondition(int conditionIndex, int index)
+    {
+        ConditionsTabGrid.RowDefinitions.Insert(0, new RowDefinition() { Height = lrgLen });
+        Grid.SetRow(AddConditionButton, this.conditionControls.Count + 1);
+        ConditionControls conditionControls = new ConditionControls() { index = index, conditionIndex = conditionIndex, extra = new List<FrameworkElement>(4) };
+
+        BlueprintData.NPCCondition conditionData = default;
+        if (conditionIndex > -1 && conditionIndex < this.data.Conditions.Count)
+            conditionData = this.data.Conditions[conditionIndex];
+        else
+            conditionData.ConditionType = ENPCConditionType.NONE;
+
+        conditionControls.leftHost = new StackPanel()
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        Grid.SetRow(conditionControls.leftHost, index);
+        Grid.SetColumn(conditionControls.leftHost, 0);
+        conditionControls.removeButton = new Button()
+        {
+            Content = "Remove",
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0d, 0d, 10d, 0d),
+            BorderBrush = Brushes.Red
+        };
+        conditionControls.removeButton.Click += OnRemoveConditionButtonClicked;
+        conditionControls.leftHost.Children.Add(conditionControls.removeButton);
+        conditionControls.number = new TextBlock()
+        {
+            Text = "#" + (index + 1).ToString(),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        conditionControls.leftHost.Children.Add(conditionControls.number);
+        ConditionsTabGrid.Children.Add(conditionControls.leftHost);
+        conditionControls.valuesGrid = new Grid()
+        {
+            VerticalAlignment = VerticalAlignment.Top
+        };
+        conditionControls.valuesGrid.ColumnDefinitions.Add(new ColumnDefinition() { Width = valGrid1 });
+        conditionControls.valuesGrid.ColumnDefinitions.Add(new ColumnDefinition() { Width = valGrid2 });
+        conditionControls.valuesGrid.RowDefinitions.Add(new RowDefinition() { Height = strLen });
+        conditionControls.valuesGrid.RowDefinitions.Add(new RowDefinition() { Height = strLen });
+        conditionControls.valuesGrid.RowDefinitions.Add(new RowDefinition() { Height = strLen });
+        conditionControls.valuesGrid.RowDefinitions.Add(new RowDefinition() { Height = strLen });
+        Grid.SetColumn(conditionControls.valuesGrid, 1);
+        Grid.SetRow(conditionControls.valuesGrid, index);
+        conditionControls.typeLbl = new TextBlock()
+        {
+            Text = "Type",
+            FontSize = 10
+        };
+        conditionControls.valuesGrid.Children.Add(conditionControls.typeLbl);
+        conditionControls.localKeyLbl = new TextBlock()
+        {
+            Text = "Quantity",
+            FontSize = 10
+        };
+        Grid.SetRow(conditionControls.localKeyLbl, 1);
+        conditionControls.valuesGrid.Children.Add(conditionControls.localKeyLbl);
+        conditionControls.shouldResetLbl = new TextBlock()
+        {
+            Text = "Is Critical",
+            FontSize = 10,
+            ToolTip = RESET_TOOLTIP
+        };
+        Grid.SetRow(conditionControls.shouldResetLbl, 2);
+        conditionControls.valuesGrid.Children.Add(conditionControls.shouldResetLbl);
+        conditionControls.logicTypeLbl = new TextBlock()
+        {
+            Text = "Logic Type",
+            FontSize = 10
+        };
+        Grid.SetRow(conditionControls.logicTypeLbl, 3);
+        conditionControls.valuesGrid.Children.Add(conditionControls.logicTypeLbl);
+        bool isVal = conditionData.ConditionType != ENPCConditionType.NONE;
+        conditionControls.typeCbo = new ComboBox();
+        for (int i = 0; i < CONDITIONS_VALUES.Length; i++)
+        {
+            conditionControls.typeCbo.Items.Add(new ComboBoxItem()
+            {
+                Content = Panel.ToProperCase(CONDITIONS_VALUES[i].ToString())
+            });
+        }
+        conditionControls.typeCbo.SelectionChanged += OnConditionTypeChanged;
+        Grid.SetColumn(conditionControls.typeCbo, 1);
+        conditionControls.valuesGrid.Children.Add(conditionControls.typeCbo);
+        conditionControls.localKeyTxt = new TextBox();
+        Grid.SetColumn(conditionControls.localKeyTxt, 1);
+        Grid.SetRow(conditionControls.localKeyTxt, 1);
+        conditionControls.valuesGrid.Children.Add(conditionControls.localKeyTxt);
+        conditionControls.shouldResetChk = new CheckBox()
+        {
+            ToolTip = RESET_TOOLTIP
+        };
+        Grid.SetColumn(conditionControls.shouldResetChk, 1);
+        Grid.SetRow(conditionControls.shouldResetChk, 2);
+        conditionControls.valuesGrid.Children.Add(conditionControls.shouldResetChk);
+        conditionControls.logicTypeCbo = new ComboBox();
+        for (int i = 0; i < LOGIC_VALUES.Length; i++)
+        {
+            conditionControls.logicTypeCbo.Items.Add(new ComboBoxItem()
+            {
+                Content = Panel.ToProperCase(LOGIC_VALUES[i].ToString())
+            });
+        }
+        Grid.SetColumn(conditionControls.logicTypeCbo, 1);
+        Grid.SetRow(conditionControls.logicTypeCbo, 3);
+        conditionControls.valuesGrid.Children.Add(conditionControls.logicTypeCbo);
+        if (isVal)
+        {
+            Panel.SelectEnum(conditionData.ConditionType, conditionControls.typeCbo);
+            conditionControls.shouldResetChk.IsChecked = conditionData.ShouldReset;
+            Panel.SelectEnum(conditionData.LogicType, conditionControls.logicTypeCbo);
+            conditionControls.localKeyTxt.Text = conditionData.LocalText ?? string.Empty;
+        }
+        ConditionsTabGrid.Children.Add(conditionControls.valuesGrid);
+        this.conditionControls.Add(conditionControls);
+    }
+    public void OnConditionTypeChanged(object sender, SelectionChangedEventArgs args)
+    {
+        if (sender is ComboBox typeCbo)
+        {
+            for (int i = 0; i < conditionControls.Count; i++)
+            {
+                if (conditionControls[i].typeCbo == typeCbo)
+                {
+                    OnConditionTypeChanged(i);
+                    return;
+                }
+            }
+        }
     }
 
+    private void OnConditionTypeChanged(int index)
+    {
+        ConditionControls ctrls = conditionControls[index];
+        for (int i = ctrls.extra.Count - 1; i >= 0; i--)
+        {
+            ctrls.valuesGrid.Children.Remove(ctrls.extra[i]);
+            ctrls.extra.RemoveAt(i);
+        }
+
+        ENPCConditionType newtype = Panel.GetSelectedEnum<ENPCConditionType>(ctrls.typeCbo);
+        int row = 4;
+        int ct = ctrls.valuesGrid.RowDefinitions.Count;
+        for (; ct > 4; ct--)
+            ctrls.valuesGrid.RowDefinitions.RemoveAt(ct - 1);
+        if (ctrls.conditionIndex > -1 && ctrls.conditionIndex < data.Conditions.Count && data.Conditions[ctrls.conditionIndex].ConditionType == newtype && data.Conditions[ctrls.conditionIndex].Condition != null)
+        {
+            data.Conditions[ctrls.conditionIndex].Condition!.AddChildren(ctrls.valuesGrid, ref row, ctrls.extra);
+        }
+        else
+        {
+            ctrls.conditionDataPending = newtype switch
+                {
+                    ENPCConditionType.EXPERIENCE => new BlueprintData.NPCCondition.NPCExperienceConditionData(),
+                    ENPCConditionType.REPUTATION => new BlueprintData.NPCCondition.NPCReputationConditionData(),
+                    ENPCConditionType.FLAG_BOOL => new BlueprintData.NPCCondition.NPCBoolFlagConditionData(),
+                    ENPCConditionType.FLAG_SHORT => new BlueprintData.NPCCondition.NPCShortFlagConditionData(),
+                    ENPCConditionType.QUEST => new BlueprintData.NPCCondition.NPCQuestConditionData(),
+                    ENPCConditionType.SKILLSET => new BlueprintData.NPCCondition.NPCSkillsetConditionData(),
+                    ENPCConditionType.ITEM => new BlueprintData.NPCCondition.NPCItemConditionData(),
+                    ENPCConditionType.KILLS_ZOMBIE => new BlueprintData.NPCCondition.NPCZombieKillsConditionData(),
+                    ENPCConditionType.KILLS_HORDE => new BlueprintData.NPCCondition.NPCHordeKillsConditionData(),
+                    ENPCConditionType.KILLS_ANIMAL => new BlueprintData.NPCCondition.NPCAnimalKillsConditionData(),
+                    ENPCConditionType.COMPARE_FLAGS => new BlueprintData.NPCCondition.NPCCompareFlagsConditionData(),
+                    ENPCConditionType.TIME_OF_DAY => new BlueprintData.NPCCondition.NPCTimeOfDayConditionData(),
+                    ENPCConditionType.PLAYER_LIFE_HEALTH => new BlueprintData.NPCCondition.NPCPlayerLifeHealthConditionData(),
+                    ENPCConditionType.PLAYER_LIFE_FOOD => new BlueprintData.NPCCondition.NPCPlayerLifeFoodConditionData(),
+                    ENPCConditionType.PLAYER_LIFE_WATER => new BlueprintData.NPCCondition.NPCPlayerLifeWaterConditionData(),
+                    ENPCConditionType.PLAYER_LIFE_VIRUS => new BlueprintData.NPCCondition.NPCPlayerLifeVirusConditionData(),
+                    ENPCConditionType.HOLIDAY => new BlueprintData.NPCCondition.NPCHolidayConditionData(),
+                    ENPCConditionType.KILLS_PLAYER => new BlueprintData.NPCCondition.NPCPlayerKillsConditionData(),
+                    ENPCConditionType.KILLS_OBJECT => new BlueprintData.NPCCondition.NPCObjectKillsConditionData(),
+                    ENPCConditionType.CURRENCY => new BlueprintData.NPCCondition.NPCCurrencyConditionData(),
+                    ENPCConditionType.KILLS_TREE => new BlueprintData.NPCCondition.NPCTreeKillsConditionData(),
+                    ENPCConditionType.WEATHER_STATUS => new BlueprintData.NPCCondition.NPCTreeKillsConditionData(),
+                    ENPCConditionType.WEATHER_BLEND_ALPHA => new BlueprintData.NPCCondition.NPCTreeKillsConditionData(),
+                    _ => null
+                };
+            ctrls.conditionDataPending?.AddChildren(ctrls.valuesGrid, ref row, ctrls.extra);
+        }
+        conditionControls[index] = ctrls;
+    }
+    public void OnRemoveConditionButtonClicked(object sender, RoutedEventArgs args)
+    {
+        if (sender is Button button)
+        {
+            for (int i = 0; i < conditionControls.Count; i++)
+            {
+                if (conditionControls[i].removeButton == button)
+                {
+                    RemoveCondition(conditionControls[i]);
+                    return;
+                }
+            }
+        }
+    }
+    private void RemoveCondition(ConditionControls controls)
+    {
+        ConditionsTabGrid.Children.Remove(controls.leftHost);
+        foreach (UIElement element in controls.extra)
+            controls.valuesGrid.Children.Remove(element);
+        ConditionsTabGrid.Children.Remove(controls.valuesGrid);
+        ConditionsTabGrid.RowDefinitions.RemoveAt(0);
+        for (int i = controls.index + 1; i < conditionControls.Count; i++)
+        {
+            ConditionControls ctrls = conditionControls[i];
+            ctrls.index -= 1;
+            Grid.SetRow(ctrls.leftHost, ctrls.index);
+            Grid.SetRow(ctrls.valuesGrid, ctrls.index);
+            ctrls.number.Text = "#" + ctrls.index.ToString();
+            conditionControls[i] = ctrls;
+        }
+        conditionControls.RemoveAt(controls.index);
+        Grid.SetRow(AddConditionButton, this.conditionControls.Count);
+    }
+
+    private void AddReward(int rewardIndex, int index)
+    {
+        RewardsTabGrid.RowDefinitions.Insert(0, new RowDefinition() { Height = smlLen });
+        Grid.SetRow(AddSupplyButton, this.supplyControls.Count + 1);
+        RewardControls rewardControls = new RewardControls() { index = index, rewardIndex = rewardIndex, extra = new List<FrameworkElement>(4) };
+
+        BlueprintData.NPCReward rewardData = default;
+        if (rewardIndex > -1 && rewardIndex < this.data.Rewards.Count)
+            rewardData = this.data.Rewards[rewardIndex];
+        else
+            rewardData.RewardType = ENPCRewardType.NONE;
+
+        rewardControls.leftHost = new StackPanel()
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        Grid.SetRow(rewardControls.leftHost, index);
+        Grid.SetColumn(rewardControls.leftHost, 0);
+        rewardControls.removeButton = new Button()
+        {
+            Content = "Remove",
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0d, 0d, 10d, 0d),
+            BorderBrush = Brushes.Red
+        };
+        rewardControls.removeButton.Click += OnRemoveSupplyButtonClicked;
+        rewardControls.leftHost.Children.Add(rewardControls.removeButton);
+        rewardControls.number = new TextBlock()
+        {
+            Text = "#" + (index + 1).ToString(),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        rewardControls.leftHost.Children.Add(rewardControls.number);
+        RewardsTabGrid.Children.Add(rewardControls.leftHost);
+        rewardControls.valuesGrid = new Grid();
+        rewardControls.valuesGrid.ColumnDefinitions.Add(new ColumnDefinition() { Width = valGrid1 });
+        rewardControls.valuesGrid.ColumnDefinitions.Add(new ColumnDefinition() { Width = valGrid2 });
+        rewardControls.valuesGrid.RowDefinitions.Add(new RowDefinition() { Height = strLen });
+        rewardControls.valuesGrid.RowDefinitions.Add(new RowDefinition() { Height = strLen });
+        rewardControls.valuesGrid.RowDefinitions.Add(new RowDefinition() { Height = strLen });
+        rewardControls.valuesGrid.RowDefinitions.Add(new RowDefinition() { Height = strLen });
+        Grid.SetColumn(rewardControls.valuesGrid, 1);
+        Grid.SetRow(rewardControls.valuesGrid, index);
+        rewardControls.typeLbl = new TextBlock()
+        {
+            Text = "Type",
+            FontSize = 10
+        };
+        rewardControls.valuesGrid.Children.Add(rewardControls.typeLbl);
+        rewardControls.localKeyLbl = new TextBlock()
+        {
+            Text = "Local Key",
+            FontSize = 10
+        };
+        Grid.SetRow(rewardControls.localKeyLbl, 1);
+        rewardControls.valuesGrid.Children.Add(rewardControls.localKeyLbl);
+        bool isVal = rewardData.RewardType != ENPCRewardType.NONE;
+        rewardControls.typeCbo = new ComboBox();
+        for (int i = 0; i < REWARD_VALUES.Length; i++)
+        {
+            rewardControls.typeCbo.Items.Add(new ComboBoxItem()
+            {
+                Content = Panel.ToProperCase(REWARD_VALUES[i].ToString())
+            });
+        }
+        Grid.SetColumn(rewardControls.typeCbo, 1);
+        rewardControls.valuesGrid.Children.Add(rewardControls.typeCbo);
+        rewardControls.localKeyTxt = new TextBox();
+        Grid.SetColumn(rewardControls.localKeyTxt, 1);
+        Grid.SetRow(rewardControls.localKeyTxt, 1);
+        rewardControls.valuesGrid.Children.Add(rewardControls.localKeyTxt);
+        if (isVal)
+        {
+            Panel.SelectEnum(rewardData.RewardType, rewardControls.typeCbo);
+            rewardControls.localKeyTxt.Text = rewardData.LocalText ?? string.Empty;
+        }
+        RewardsTabGrid.Children.Add(rewardControls.valuesGrid);
+        this.rewardControls.Add(rewardControls);
+    }
+
+    public void OnRemoveRewardButtonClicked(object sender, RoutedEventArgs args)
+    {
+        if (sender is Button button)
+        {
+            for (int i = 0; i < rewardControls.Count; i++)
+            {
+                if (rewardControls[i].removeButton == button)
+                {
+                    RemoveReward(rewardControls[i]);
+                    return;
+                }
+            }
+        }
+    }
+    private void RemoveReward(RewardControls controls)
+    {
+        ConditionsTabGrid.Children.Remove(controls.leftHost);
+        foreach (UIElement element in controls.extra)
+            controls.valuesGrid.Children.Remove(element);
+        ConditionsTabGrid.Children.Remove(controls.valuesGrid);
+        ConditionsTabGrid.RowDefinitions.RemoveAt(0);
+        for (int i = controls.index + 1; i < rewardControls.Count; i++)
+        {
+            RewardControls ctrls = rewardControls[i];
+            ctrls.index -= 1;
+            Grid.SetRow(ctrls.leftHost, ctrls.index);
+            Grid.SetRow(ctrls.valuesGrid, ctrls.index);
+            ctrls.number.Text = "#" + ctrls.index.ToString();
+            rewardControls[i] = ctrls;
+        }
+
+        rewardControls.RemoveAt(controls.index);
+        Grid.SetRow(AddRewardButton, this.rewardControls.Count);
+    }
 }
 public struct BlueprintData
 {
@@ -430,9 +830,9 @@ public struct BlueprintData
         public void WriteSupply(List<StringPair> pairs, int blueprintIndex, int supplyIndex)
         {
             string prefix = $"Blueprint_{blueprintIndex}_Supply_{supplyIndex}";
-            Panel.SetOrAddKey(prefix + "_ID", ID.ToString(AssetFile.info), pairs);
-            Panel.SetOrAddKey(prefix + "_Amount", ID.ToString(AssetFile.info), pairs);
-            if (Critical) Panel.SetOrAddKey(prefix + "_Critical", null, pairs);
+            Panel.SetOrAddKey(prefix + "_ID", ID.ToString(AssetFile.Locale), pairs);
+            Panel.SetOrAddKey(prefix + "_Amount", ID.ToString(AssetFile.Locale), pairs);
+            Panel.SetOrAddFlag(prefix + "_Critical", Critical, pairs);
         }
         public override string ToString() => $"Supply: ID " + ID.ToString() + ", Amount " + Amount.ToString() + (Critical ? " (Critical Item)" : string.Empty);
     }
@@ -465,8 +865,8 @@ public struct BlueprintData
         public void WriteSupply(List<StringPair> pairs, int blueprintIndex, int outputIndex)
         {
             string prefix = $"Blueprint_{blueprintIndex}_Output_{outputIndex}";
-            Panel.SetOrAddKey(prefix + "_ID", ID.ToString(AssetFile.info), pairs);
-            Panel.SetOrAddKey(prefix + "_Amount", ID.ToString(AssetFile.info), pairs);
+            Panel.SetOrAddKey(prefix + "_ID", ID.ToString(AssetFile.Locale), pairs);
+            Panel.SetOrAddKey(prefix + "_Amount", ID.ToString(AssetFile.Locale), pairs);
         }
         public override string ToString() => $"Output: ID " + ID.ToString() + ", Amount " + Amount.ToString() + (Origin != EItemOrigin.CRAFT ? "Origin: " + Origin : string.Empty);
     }
@@ -488,8 +888,8 @@ public struct BlueprintData
         public void WriteSupply(List<StringPair> pairs, int blueprintIndex)
         {
             string prefix = $"Blueprint_{blueprintIndex}_Tool";
-            Panel.SetOrAddKey(prefix, ID.ToString(AssetFile.info), pairs);
-            if (Critical) Panel.SetOrAddKey(prefix + "_Critical", null, pairs);
+            Panel.SetOrAddKey(prefix, ID.ToString(AssetFile.Locale), pairs);
+            Panel.SetOrAddFlag(prefix + "_Critical", Critical, pairs);
         }
         public override string ToString() => ID == 0 ? "No Tool" : $"Tool: ID " + ID.ToString() + (Critical ? " (Critical Item)" : string.Empty);
     }
@@ -557,13 +957,449 @@ public struct BlueprintData
             }
         }
         #region CONDITIONS
-        public abstract class NPCConditionData { }
+
+        public abstract class NPCConditionData
+        {
+            public NPCConditionData()
+            {
+
+            }
+            public abstract void AddChildren(Grid parent, ref int row, List<FrameworkElement> childrenList);
+            public abstract void WriteData(string prefix, List<StringPair> pairs);
+            public abstract void FindData(List<FrameworkElement> children);
+            protected void AddTextBoxAndLabel(Grid parent, ref int row, List<FrameworkElement> childrenList, string labeltext, string name, string? @default = null)
+            {
+                TextBlock label = new TextBlock()
+                {
+                    Text = labeltext,
+                    FontSize = 10,
+                    Name = "lbl_" + name
+                };
+                TextBox tb = new TextBox()
+                {
+                    Name = name
+                };
+                if (@default != null)
+                    tb.Text = @default;
+                parent.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(1d, GridUnitType.Star) });
+                Grid.SetRow(label, row);
+                Grid.SetRow(tb, row);
+                Grid.SetColumn(tb, 1);
+                parent.Children.Add(label);
+                parent.Children.Add(tb);
+                childrenList.Add(label);
+                childrenList.Add(tb);
+                row++;
+            }
+            protected void AddAssetReferenceGUID(Grid parent, ref int row, List<FrameworkElement> childrenList, string labeltext, string name, EAssetCategory category, EAssetType type = EAssetType.UNKNOWN, Guid? @default = null)
+            {
+                TextBlock label = new TextBlock()
+                {
+                    Text = labeltext,
+                    FontSize = 10,
+                    Name = "lbl_" + name
+                };
+                int index = -1;
+                if (@default.HasValue)
+                {
+                    for (int i = 0; i < MainWindow.Instance!.files.Count; i++)
+                    {
+                        if (MainWindow.Instance!.files[i].guid == @default.Value)
+                        {
+                            index = i;
+                            break;
+                        }
+                    }
+                }
+                AssetReference tb = new AssetReference()
+                {
+                    Name = name,
+                    Category = category,
+                    TypeFilter = type
+                };
+                tb.SelectItemIndex(index);
+                parent.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(58d, GridUnitType.Pixel) });
+                Grid.SetRow(label, row);
+                Grid.SetRow(tb, row);
+                Grid.SetColumn(tb, 1);
+                parent.Children.Add(label);
+                parent.Children.Add(tb);
+                childrenList.Add(label);
+                childrenList.Add(tb);
+                row++;
+            }
+            protected void AddAssetReferenceID(Grid parent, ref int row, List<FrameworkElement> childrenList, string labeltext, string name, EAssetCategory category, EAssetType type = EAssetType.UNKNOWN, ushort? @default = null)
+            {
+                TextBlock label = new TextBlock()
+                {
+                    Text = labeltext,
+                    FontSize = 10,
+                    Name = "lbl_" + name
+                };
+                int index = -1;
+                if (@default.HasValue)
+                {
+                    for (int i = 0; i < MainWindow.Instance!.files.Count; i++)
+                    {
+                        AssetFile file = MainWindow.Instance!.files[i];
+                        if (file.category == category && file.ID == @default.Value)
+                        {
+                            index = i;
+                            break;
+                        }
+                    }
+                }
+                AssetReference tb = new AssetReference()
+                {
+                    Name = name,
+                    Category = category,
+                    TypeFilter = type
+                };
+                tb.SelectItemIndex(index);
+                parent.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(58d, GridUnitType.Pixel) });
+                Grid.SetRow(label, row);
+                Grid.SetRow(tb, row);
+                Grid.SetColumn(tb, 1);
+                parent.Children.Add(label);
+                parent.Children.Add(tb);
+                childrenList.Add(label);
+                childrenList.Add(tb);
+                row++;
+            }
+            protected void AddCheckBoxAndLabel(Grid parent, ref int row, List<FrameworkElement> childrenList, string labeltext, string name, bool @default = false)
+            {
+                TextBlock label = new TextBlock()
+                {
+                    Text = labeltext,
+                    FontSize = 10,
+                    Name = "lbl_" + name
+                };
+                CheckBox tb = new CheckBox()
+                {
+                    Name = name,
+                    IsChecked = @default
+                };
+                parent.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(1d, GridUnitType.Star) });
+                Grid.SetRow(label, row);
+                Grid.SetRow(tb, row);
+                Grid.SetColumn(tb, 1);
+                parent.Children.Add(label);
+                parent.Children.Add(tb);
+                childrenList.Add(label);
+                childrenList.Add(tb);
+                row++;
+            }
+            protected void AddEnumDropdown<TEnum>(Grid parent, ref int row, List<FrameworkElement> childrenList, string labeltext, string name, TEnum? excluded = null, TEnum? @default = null) where TEnum : struct
+            {
+                TextBlock label = new TextBlock()
+                {
+                    Text = labeltext,
+                    FontSize = 10,
+                    Name = "lbl_" + name
+                };
+                ComboBox tb = new ComboBox()
+                {
+                    Name = name,
+                    IsEditable = false,
+                };
+                parent.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(1d, GridUnitType.Star) });
+                TEnum[] values = Enum.GetValues(typeof(TEnum)).Cast<TEnum>().OrderBy(x => (int)x.ToString()[0]).ToArray();
+                int selected = -1;
+                if (excluded.HasValue)
+                {
+                    if (@default.HasValue)
+                    {
+                        for (int i = 0; i < values.Length; i++)
+                        {
+                            if (!Equals(values[i], excluded.Value))
+                            {
+                                if (selected == -1 && Equals(@default.Value, values[i]))
+                                    selected = i;
+                                tb.Items.Add(new ComboBoxItem() { Content = Panel.ToProperCase(values[i].ToString()) });
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < values.Length; i++)
+                            if (!Equals(values[i], excluded.Value))
+                                tb.Items.Add(new ComboBoxItem() { Content = Panel.ToProperCase(values[i].ToString()) });
+                    }
+                }
+                else if (@default.HasValue)
+                {
+                    for (int i = 0; i < values.Length; i++)
+                    {
+                        if (selected == -1 && Equals(@default.Value, values[i]))
+                            selected = i;
+                        tb.Items.Add(new ComboBoxItem() { Content = Panel.ToProperCase(values[i].ToString()) });
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < values.Length; i++)
+                        tb.Items.Add(new ComboBoxItem() { Content = Panel.ToProperCase(values[i].ToString()) });
+                }
+                Grid.SetRow(label, row);
+                Grid.SetRow(tb, row);
+                Grid.SetColumn(tb, 1);
+                parent.Children.Add(label);
+                parent.Children.Add(tb);
+                childrenList.Add(label);
+                childrenList.Add(tb);
+                row++;
+            }
+            protected ushort FindUInt16(string name, List<FrameworkElement> children, ushort save)
+            {
+                for (int i = 0; i < children.Count; i++)
+                {
+                    FrameworkElement child = children[i];
+                    if (child.Name.Equals(name, StringComparison.Ordinal))
+                    {
+                        if (child is TextBox box)
+                        {
+                            if (box.Text != null && ushort.TryParse(box.Text, System.Globalization.NumberStyles.Any, AssetFile.Locale, out ushort rtn))
+                                return rtn;
+                            else
+                                box.Text = save.ToString(AssetFile.Locale);
+                        }
+                        return save;
+                    }
+                }
+                return save;
+            }
+            protected Guid FindAsset(string name, List<FrameworkElement> children, Guid save)
+            {
+                for (int i = 0; i < children.Count; i++)
+                {
+                    FrameworkElement child = children[i];
+                    if (child.Name.Equals(name, StringComparison.Ordinal))
+                    {
+                        if (child is AssetReference box)
+                        {
+                            int sfi = box.SelectedFileIndex;
+                            if (sfi == -1) return save;
+                            else
+                                return MainWindow.Instance!.files[sfi].guid;
+                        }
+                        return save;
+                    }
+                }
+                return save;
+            }
+            protected ushort FindAsset(string name, List<FrameworkElement> children, ushort save)
+            {
+                for (int i = 0; i < children.Count; i++)
+                {
+                    FrameworkElement child = children[i];
+                    if (child.Name.Equals(name, StringComparison.Ordinal))
+                    {
+                        if (child is AssetReference box)
+                        {
+                            int sfi = box.SelectedFileIndex;
+                            if (sfi == -1) return save;
+                            else
+                                return MainWindow.Instance!.files[sfi].ID;
+                        }
+                        return save;
+                    }
+                }
+                return save;
+            }
+            protected AssetFile? FindAsset(string name, List<FrameworkElement> children)
+            {
+                for (int i = 0; i < children.Count; i++)
+                {
+                    FrameworkElement child = children[i];
+                    if (child.Name.Equals(name, StringComparison.Ordinal))
+                    {
+                        if (child is AssetReference box)
+                        {
+                            int sfi = box.SelectedFileIndex;
+                            if (sfi == -1) return default;
+                            else
+                            {
+                                return MainWindow.Instance!.files[sfi];
+                            }
+                        }
+                        return default;
+                    }
+                }
+                return default;
+            }
+            public static uint FindUInt32(string name, List<FrameworkElement> children, uint save)
+            {
+                for (int i = 0; i < children.Count; i++)
+                {
+                    FrameworkElement child = children[i];
+                    if (child.Name.Equals(name, StringComparison.Ordinal))
+                    {
+                        if (child is TextBox box)
+                        {
+                            if (box.Text != null && uint.TryParse(box.Text, System.Globalization.NumberStyles.Any, AssetFile.Locale, out uint rtn))
+                                return rtn;
+                            else
+                                box.Text = save.ToString(AssetFile.Locale);
+                        }
+                        return save;
+                    }
+                }
+                return save;
+            }
+            public static int FindInt32(string name, List<FrameworkElement> children, int save)
+            {
+                for (int i = 0; i < children.Count; i++)
+                {
+                    FrameworkElement child = children[i];
+                    if (child.Name.Equals(name, StringComparison.Ordinal))
+                    {
+                        if (child is TextBox box)
+                        {
+                            if (box.Text != null && int.TryParse(box.Text, System.Globalization.NumberStyles.Any, AssetFile.Locale, out int rtn))
+                                return rtn;
+                            else
+                                box.Text = save.ToString(AssetFile.Locale);
+                        }
+                        return save;
+                    }
+                }
+                return save;
+            }
+            public static byte FindUInt8(string name, List<FrameworkElement> children, byte save)
+            {
+                for (int i = 0; i < children.Count; i++)
+                {
+                    FrameworkElement child = children[i];
+                    if (child.Name.Equals(name, StringComparison.Ordinal))
+                    {
+                        if (child is TextBox box)
+                        {
+                            if (box.Text != null && byte.TryParse(box.Text, System.Globalization.NumberStyles.Any, AssetFile.Locale, out byte rtn))
+                                return rtn;
+                            else
+                                box.Text = save.ToString(AssetFile.Locale);
+                        }
+                        return save;
+                    }
+                }
+                return save;
+            }
+            public static short FindInt16(string name, List<FrameworkElement> children, short save)
+            {
+                for (int i = 0; i < children.Count; i++)
+                {
+                    FrameworkElement child = children[i];
+                    if (child.Name.Equals(name, StringComparison.Ordinal))
+                    {
+                        if (child is TextBox box)
+                        {
+                            if (box.Text != null && short.TryParse(box.Text, System.Globalization.NumberStyles.Any, AssetFile.Locale, out short rtn))
+                                return rtn;
+                            else
+                                box.Text = save.ToString(AssetFile.Locale);
+                        }
+                        return save;
+                    }
+                }
+                return save;
+            }
+            public static float FindFloat(string name, List<FrameworkElement> children, float save)
+            {
+                for (int i = 0; i < children.Count; i++)
+                {
+                    FrameworkElement child = children[i];
+                    if (child.Name.Equals(name, StringComparison.Ordinal))
+                    {
+                        if (child is TextBox box)
+                        {
+                            if (box.Text != null && float.TryParse(box.Text, System.Globalization.NumberStyles.Any, AssetFile.Locale, out float rtn))
+                                return rtn;
+                            else
+                                box.Text = save.ToString(AssetFile.Locale);
+                        }
+                        return save;
+                    }
+                }
+                return save;
+            }
+            public static bool FindBool(string name, List<FrameworkElement> children, bool save)
+            {
+                for (int i = 0; i < children.Count; i++)
+                {
+                    FrameworkElement child = children[i];
+                    if (child.Name.Equals(name, StringComparison.Ordinal))
+                    {
+                        if (child is CheckBox box)
+                        {
+                            if (box.IsChecked.HasValue)
+                                return box.IsChecked.Value;
+                            else
+                                box.IsChecked = save;
+                        }
+                        return save;
+                    }
+                }
+                return save;
+            }
+            public static TEnum FindEnum<TEnum>(string name, List<FrameworkElement> children, TEnum save) where TEnum : struct
+            {
+                for (int i = 0; i < children.Count; i++)
+                {
+                    FrameworkElement child = children[i];
+                    if (child.Name.Equals(name, StringComparison.Ordinal))
+                    {
+                        if (child is ComboBox box)
+                        {
+                            if (box.SelectedIndex == -1) return save;
+                            if (box.SelectedItem is ComboBoxItem item && item.Content is string value && Enum.TryParse(value, true, out TEnum val))
+                                return val;
+                            else
+                                Panel.SelectEnum(save, box);
+                        }
+                        return save;
+                    }
+                }
+                return save;
+            }
+            public static string FindString(string name, List<FrameworkElement> children, string save)
+            {
+                for (int i = 0; i < children.Count; i++)
+                {
+                    FrameworkElement child = children[i];
+                    if (child.Name.Equals(name, StringComparison.Ordinal))
+                    {
+                        if (child is TextBox box)
+                        {
+                            if (box.Text != null)
+                                return box.Text;
+                            else
+                                box.Text = save;
+                        }
+                        return save;
+                    }
+                }
+                return save;
+            }
+        }
         public class NPCExperienceConditionData : NPCConditionData
         {
             public uint Experience;
             public NPCExperienceConditionData(AssetFile file, string prefix)
             {
                 Experience = file.GetUIntegerType(prefix + "_Value");
+            }
+            public NPCExperienceConditionData() {}
+            public override void AddChildren(Grid parent, ref int row, List<FrameworkElement> childrenList)
+            {
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Experience:", "experienceConditionExp", Experience.ToString(AssetFile.Locale));
+            }
+            public override void WriteData(string prefix, List<StringPair> pairs)
+            {
+                Panel.SetOrAddKey(prefix + "_Value", Experience, pairs);
+            }
+            public override void FindData(List<FrameworkElement> children)
+            {
+                Experience = FindUInt32("experienceConditionExp", children, Experience);
             }
         }
         public class NPCReputationConditionData : NPCConditionData
@@ -572,6 +1408,19 @@ public struct BlueprintData
             public NPCReputationConditionData(AssetFile file, string prefix)
             {
                 Reputation = file.GetUIntegerType(prefix + "_Value");
+            }
+            public NPCReputationConditionData() { }
+            public override void AddChildren(Grid parent, ref int row, List<FrameworkElement> childrenList)
+            {
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Reputation:", "reputationConditionRep", Reputation.ToString(AssetFile.Locale));
+            }
+            public override void WriteData(string prefix, List<StringPair> pairs)
+            {
+                Panel.SetOrAddKey(prefix + "_Value", Reputation, pairs);
+            }
+            public override void FindData(List<FrameworkElement> children)
+            {
+                Reputation = FindUInt32("reputationConditionRep", children, Reputation);
             }
         }
         public class NPCFlagConditionData : NPCConditionData
@@ -583,6 +1432,22 @@ public struct BlueprintData
                 FlagID = file.GetUShortType(prefix + "_ID");
                 AllowUnset = file.HasProperty(prefix + "_Allow_Unset");
             }
+            public NPCFlagConditionData() { }
+            public override void AddChildren(Grid parent, ref int row, List<FrameworkElement> childrenList)
+            {
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Flag ID:", "flagConditionID", FlagID.ToString(AssetFile.Locale));
+                AddCheckBoxAndLabel(parent, ref row, childrenList, "Allow Unset:", "flagConditionAllowUnset", AllowUnset);
+            }
+            public override void WriteData(string prefix, List<StringPair> pairs)
+            {
+                Panel.SetOrAddKey(prefix + "_ID", FlagID, pairs);
+                Panel.SetOrAddFlag(prefix + "_Allow_Unset", AllowUnset, pairs);
+            }
+            public override void FindData(List<FrameworkElement> children)
+            {
+                FlagID = FindUInt16("flagConditionID", children, FlagID);
+                AllowUnset = FindBool("flagConditionAllowUnset", children, AllowUnset);
+            }
         }
         public class NPCBoolFlagConditionData : NPCFlagConditionData
         {
@@ -591,6 +1456,22 @@ public struct BlueprintData
             {
                 Value = file.GetBooleanType(prefix + "_Value");
             }
+            public NPCBoolFlagConditionData() { }
+            public override void AddChildren(Grid parent, ref int row, List<FrameworkElement> childrenList)
+            {
+                base.AddChildren(parent, ref row, childrenList);
+                AddCheckBoxAndLabel(parent, ref row, childrenList, "Value:", "flagBoolConditionValue", Value);
+            }
+            public override void WriteData(string prefix, List<StringPair> pairs)
+            {
+                base.WriteData(prefix, pairs);
+                Panel.SetOrAddKey(prefix + "_Value", Value, pairs);
+            }
+            public override void FindData(List<FrameworkElement> children)
+            {
+                base.FindData(children);
+                Value = FindBool("flagBoolConditionValue", children, Value);
+            }
         }
         public class NPCShortFlagConditionData : NPCFlagConditionData
         {
@@ -598,6 +1479,22 @@ public struct BlueprintData
             public NPCShortFlagConditionData(AssetFile file, string prefix) : base (file, prefix)
             {
                 Value = file.GetShortType(prefix + "_Value");
+            }
+            public NPCShortFlagConditionData() { }
+            public override void AddChildren(Grid parent, ref int row, List<FrameworkElement> childrenList)
+            {
+                base.AddChildren(parent, ref row, childrenList);
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Value:", "flagShortConditionValue", Value.ToString(AssetFile.Locale));
+            }
+            public override void WriteData(string prefix, List<StringPair> pairs)
+            {
+                base.WriteData(prefix, pairs);
+                Panel.SetOrAddKey(prefix + "_Value", Value, pairs);
+            }
+            public override void FindData(List<FrameworkElement> children)
+            {
+                base.FindData(children);
+                Value = FindInt16("flagBoolConditionValue", children, Value);
             }
         }
         public class NPCQuestConditionData : NPCConditionData
@@ -611,6 +1508,25 @@ public struct BlueprintData
                 QuestStatus = file.GetEnumType<ENPCQuestStatus>(prefix + "_Status");
                 IgnoreNPC = file.HasProperty(prefix + "_Ignore_NPC");
             }
+            public NPCQuestConditionData() { }
+            public override void AddChildren(Grid parent, ref int row, List<FrameworkElement> childrenList)
+            {
+                AddAssetReferenceID(parent, ref row, childrenList, "Quest ID:", "questConditionID", EAssetCategory.NPC, EAssetType.Quest, QuestID);
+                AddEnumDropdown<ENPCQuestStatus>(parent, ref row, childrenList, "Quest Status:", "questConditionStatus", null, QuestStatus);
+                AddCheckBoxAndLabel(parent, ref row, childrenList, "Ignore NPC:", "questConditionIgnoreNpc", IgnoreNPC);
+            }
+            public override void WriteData(string prefix, List<StringPair> pairs)
+            {
+                Panel.SetOrAddKey(prefix + "_ID", QuestID, pairs);
+                Panel.SetOrAddEnumKey(prefix + "_Status", QuestStatus, pairs);
+                Panel.SetOrAddFlag(prefix + "_Ignore_NPC", IgnoreNPC, pairs);
+            }
+            public override void FindData(List<FrameworkElement> children)
+            {
+                QuestID = FindAsset("questConditionID", children, QuestID);
+                QuestStatus = FindEnum("questConditionStatus", children, QuestStatus);
+                IgnoreNPC = FindBool("questConditionIgnoreNpc", children, IgnoreNPC);
+            }
         }
         public class NPCSkillsetConditionData : NPCConditionData
         {
@@ -618,6 +1534,19 @@ public struct BlueprintData
             public NPCSkillsetConditionData(AssetFile file, string prefix)
             {
                 Skillset = file.GetEnumType<EPlayerSkillset>(prefix + "_Value");
+            }
+            public NPCSkillsetConditionData() { }
+            public override void AddChildren(Grid parent, ref int row, List<FrameworkElement> childrenList)
+            {
+                AddEnumDropdown<EPlayerSkillset>(parent, ref row, childrenList, "Skillset:", "skillsetConditionSkillset", null, Skillset);
+            }
+            public override void WriteData(string prefix, List<StringPair> pairs)
+            {
+                Panel.SetOrAddEnumKey(prefix + "_Value", Skillset, pairs);
+            }
+            public override void FindData(List<FrameworkElement> children)
+            {
+                Skillset = FindEnum("skillsetConditionSkillset", children, Skillset);
             }
         }
         public class NPCItemConditionData : NPCConditionData
@@ -631,6 +1560,39 @@ public struct BlueprintData
                 ItemGUID = file.GetGUIDType(k);
                 ItemID = file.GetUShortType(k);
                 Amount = file.GetUShortType(prefix + "_Amount");
+            }
+            public NPCItemConditionData() { }
+            public override void AddChildren(Grid parent, ref int row, List<FrameworkElement> childrenList)
+            {
+                if (ItemID > 0 && ItemGUID == Guid.Empty)
+                {
+                    AssetFile file = MainWindow.Instance!.files.FirstOrDefault(x => x.ID == ItemID && x.category == EAssetCategory.ITEM);
+                    if (file.guid != Guid.Empty)
+                    {
+                        ItemGUID = file.guid;
+                    }
+                }
+
+                AddAssetReferenceGUID(parent, ref row, childrenList, "Item GUID:", "itemConditionGuid", EAssetCategory.ITEM, EAssetType.UNKNOWN, ItemGUID);
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Item Amount:", "itemConditionAmount", Amount.ToString(AssetFile.Locale));
+            }
+            public override void WriteData(string prefix, List<StringPair> pairs)
+            {
+                if (ItemGUID != Guid.Empty)
+                    Panel.SetOrAddKey(prefix + "_ID", ItemGUID, pairs);
+                else
+                    Panel.SetOrAddKey(prefix + "_ID", ItemID, pairs);
+                Panel.SetOrAddKey(prefix + "_Amount", Amount, pairs);
+            }
+            public override void FindData(List<FrameworkElement> children)
+            {
+                AssetFile? file = FindAsset("itemConditionGuid", children);
+                if (file is not null)
+                {
+                    ItemID = file.ID;
+                    ItemGUID = file.guid;
+                }
+                Amount = FindUInt16("itemConditionAmount", children, Amount);
             }
         }
         public class NPCZombieKillsConditionData : NPCConditionData
@@ -654,6 +1616,40 @@ public struct BlueprintData
                 MinRadius = file.GetFloatType(prefix + "_MinRadius", 512f);
                 Spawn = file.HasProperty(prefix + "_Spawn");
             }
+            public NPCZombieKillsConditionData() { }
+            public override void AddChildren(Grid parent, ref int row, List<FrameworkElement> childrenList)
+            {
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Zombie ID:", "zombieKillsConditionID", ID.ToString(AssetFile.Locale));
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Kill Count:", "zombieKillsConditionValue", Value.ToString(AssetFile.Locale));
+                AddCheckBoxAndLabel(parent, ref row, childrenList, "Should Spawn", "zombieKillsConditionSpawn", Spawn);
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Spawn Quantity:", "zombieKillsConditionSpawnQuantity", SpawnQuantity.ToString(AssetFile.Locale));
+                AddEnumDropdown<EZombieSpeciality>(parent, ref row, childrenList, "Zombie Type:", "zombieKillsConditionZombieType", null, ZombieType);
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Nav ID:", "zombieKillsConditionNavID", NavID.ToString(AssetFile.Locale));
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Max Radius:", "zombieKillsConditionMaxRadius", MaxRadius.ToString(AssetFile.Locale));
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Min Radius:", "zombieKillsConditionMinRadius", MinRadius.ToString(AssetFile.Locale));
+            }
+            public override void WriteData(string prefix, List<StringPair> pairs)
+            {
+                Panel.SetOrAddKey(prefix + "_ID", ID, pairs);
+                Panel.SetOrAddKey(prefix + "_Value", Value, pairs);
+                Panel.SetOrAddEnumKey(prefix + "_Zombie", ZombieType, pairs);
+                Panel.SetOrAddKey(prefix + "_Spawn_Quantity", SpawnQuantity, pairs);
+                Panel.SetOrAddKey(prefix + "_Nav", NavID, pairs);
+                Panel.SetOrAddKey(prefix + "_Radius", MaxRadius, pairs);
+                Panel.SetOrAddKey(prefix + "_MinRadius", MinRadius, pairs);
+                Panel.SetOrAddFlag(prefix + "_Spawn", Spawn, pairs);
+            }
+            public override void FindData(List<FrameworkElement> children)
+            {
+                ID = FindUInt16("zombieKillsConditionID", children, ID);
+                Value = FindInt16("zombieKillsConditionValue", children, Value);
+                ZombieType = FindEnum("zombieKillsConditionZombieType", children, ZombieType);
+                Spawn = FindBool("zombieKillsConditionSpawn", children, Spawn);
+                SpawnQuantity = FindInt32("zombieKillsConditionSpawnQuantity", children, SpawnQuantity);
+                NavID = FindUInt8("zombieKillsConditionNavID", children, NavID);
+                MaxRadius = FindFloat("zombieKillsConditionMaxRadius", children, MaxRadius);
+                MinRadius = FindFloat("zombieKillsConditionMinRadius", children, MinRadius);
+            }
         }
         public class NPCHordeKillsConditionData : NPCConditionData
         {
@@ -666,6 +1662,25 @@ public struct BlueprintData
                 Value = file.GetShortType(prefix + "_Value");
                 NavID = file.GetByteType(prefix + "_Nav");
             }
+            public NPCHordeKillsConditionData() { }
+            public override void AddChildren(Grid parent, ref int row, List<FrameworkElement> childrenList)
+            {
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Horde ID:", "hordeKillsConditionID", ID.ToString(AssetFile.Locale));
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Kill Count:", "hordeKillsConditionValue", Value.ToString(AssetFile.Locale));
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Nav ID:", "hordeKillsConditionNavID", NavID.ToString(AssetFile.Locale));
+            }
+            public override void WriteData(string prefix, List<StringPair> pairs)
+            {
+                Panel.SetOrAddKey(prefix + "_ID", ID, pairs);
+                Panel.SetOrAddKey(prefix + "_Value", Value, pairs);
+                Panel.SetOrAddKey(prefix + "_Nav", NavID, pairs);
+            }
+            public override void FindData(List<FrameworkElement> children)
+            {
+                ID = FindUInt16("hordeKillsConditionID", children, ID);
+                Value = FindInt16("hordeKillsConditionValue", children, Value);
+                NavID = FindUInt8("hordeKillsConditionNavID", children, NavID);
+            }
         }
         public class NPCAnimalKillsConditionData : NPCConditionData
         {
@@ -677,6 +1692,25 @@ public struct BlueprintData
                 ID = file.GetUShortType(prefix + "_ID");
                 Value = file.GetShortType(prefix + "_Value");
                 Animal = file.GetByteType(prefix + "_Animal");
+            }
+            public NPCAnimalKillsConditionData() { }
+            public override void AddChildren(Grid parent, ref int row, List<FrameworkElement> childrenList)
+            {
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Condition ID:", "animalKillsConditionID", ID.ToString(AssetFile.Locale));
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Kill Count:", "animalKillsConditionValue", Value.ToString(AssetFile.Locale));
+                AddAssetReferenceID(parent, ref row, childrenList, "Animal ID:", "animalKillsConditionAnimalID", EAssetCategory.ANIMAL, EAssetType.Animal, Animal);
+            }
+            public override void WriteData(string prefix, List<StringPair> pairs)
+            {
+                Panel.SetOrAddKey(prefix + "_ID", ID, pairs);
+                Panel.SetOrAddKey(prefix + "_Value", Value, pairs);
+                Panel.SetOrAddKey(prefix + "_Animal", Animal, pairs);
+            }
+            public override void FindData(List<FrameworkElement> children)
+            {
+                ID = FindUInt16("animalKillsConditionID", children, ID);
+                Value = FindInt16("animalKillsConditionValue", children, Value);
+                Animal = FindAsset("animalKillsConditionAnimalID", children, Animal);
             }
         }
         public class NPCCompareFlagsConditionData : NPCConditionData
@@ -692,6 +1726,28 @@ public struct BlueprintData
                 AllowAUnset = file.HasProperty(prefix + "_Allow_A_Unset");
                 AllowBUnset = file.HasProperty(prefix + "_Allow_B_Unset");
             }
+            public NPCCompareFlagsConditionData() { }
+            public override void AddChildren(Grid parent, ref int row, List<FrameworkElement> childrenList)
+            {
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Flag 1:", "compareFlagsA", A.ToString(AssetFile.Locale));
+                AddCheckBoxAndLabel(parent, ref row, childrenList, "  Allow Unset:", "compareFlagsAAllowUnset", AllowAUnset);
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Flag 2:", "compareFlagsB", B.ToString(AssetFile.Locale));
+                AddCheckBoxAndLabel(parent, ref row, childrenList, "  Allow Unset:", "compareFlagsBAllowUnset", AllowBUnset);
+            }
+            public override void WriteData(string prefix, List<StringPair> pairs)
+            {
+                Panel.SetOrAddKey(prefix + "_A_ID", A, pairs);
+                Panel.SetOrAddFlag(prefix + "_Allow_A_Unset", AllowAUnset, pairs);
+                Panel.SetOrAddKey(prefix + "_B_ID", B, pairs);
+                Panel.SetOrAddFlag(prefix + "_Allow_B_Unset", AllowBUnset, pairs);
+            }
+            public override void FindData(List<FrameworkElement> children)
+            {
+                A = FindUInt16("compareFlagsA", children, A);
+                B = FindUInt16("compareFlagsB", children, B);
+                AllowAUnset = FindBool("compareFlagsAAllowUnset", children, AllowAUnset);
+                AllowBUnset = FindBool("compareFlagsBAllowUnset", children, AllowBUnset);
+            }
         }
         public class NPCTimeOfDayConditionData : NPCConditionData
         {
@@ -699,6 +1755,19 @@ public struct BlueprintData
             public NPCTimeOfDayConditionData(AssetFile file, string prefix)
             {
                 TimeOfDaySeconds = file.GetIntegerType(prefix + "_Second");
+            }
+            public NPCTimeOfDayConditionData() { }
+            public override void AddChildren(Grid parent, ref int row, List<FrameworkElement> childrenList)
+            {
+                AddTextBoxAndLabel(parent, ref row, childrenList, "TOD Seconds:", "timeConditionTimeOfDay", TimeOfDaySeconds.ToString(AssetFile.Locale));
+            }
+            public override void WriteData(string prefix, List<StringPair> pairs)
+            {
+                Panel.SetOrAddKey(prefix + "_Second", TimeOfDaySeconds, pairs);
+            }
+            public override void FindData(List<FrameworkElement> children)
+            {
+                TimeOfDaySeconds = FindInt32("timeConditionTimeOfDay", children, TimeOfDaySeconds);
             }
         }
         public class NPCPlayerLifeHealthConditionData : NPCConditionData
@@ -708,6 +1777,19 @@ public struct BlueprintData
             {
                 Value = file.GetIntegerType(prefix + "_Value");
             }
+            public NPCPlayerLifeHealthConditionData() { }
+            public override void AddChildren(Grid parent, ref int row, List<FrameworkElement> childrenList)
+            {
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Health Value:", "healthConditionValue", Value.ToString(AssetFile.Locale));
+            }
+            public override void WriteData(string prefix, List<StringPair> pairs)
+            {
+                Panel.SetOrAddKey(prefix + "_Value", Value, pairs);
+            }
+            public override void FindData(List<FrameworkElement> children)
+            {
+                Value = FindInt32("healthConditionValue", children, Value);
+            }
         }
         public class NPCPlayerLifeFoodConditionData : NPCConditionData
         {
@@ -715,6 +1797,19 @@ public struct BlueprintData
             public NPCPlayerLifeFoodConditionData(AssetFile file, string prefix)
             {
                 Value = file.GetIntegerType(prefix + "_Value");
+            }
+            public NPCPlayerLifeFoodConditionData() { }
+            public override void AddChildren(Grid parent, ref int row, List<FrameworkElement> childrenList)
+            {
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Food Value:", "foodConditionValue", Value.ToString(AssetFile.Locale));
+            }
+            public override void WriteData(string prefix, List<StringPair> pairs)
+            {
+                Panel.SetOrAddKey(prefix + "_Value", Value, pairs);
+            }
+            public override void FindData(List<FrameworkElement> children)
+            {
+                Value = FindInt32("foodConditionValue", children, Value);
             }
         }
         public class NPCPlayerLifeWaterConditionData : NPCConditionData
@@ -724,6 +1819,19 @@ public struct BlueprintData
             {
                 Value = file.GetIntegerType(prefix + "_Value");
             }
+            public NPCPlayerLifeWaterConditionData() { }
+            public override void AddChildren(Grid parent, ref int row, List<FrameworkElement> childrenList)
+            {
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Water Value:", "waterConditionValue", Value.ToString(AssetFile.Locale));
+            }
+            public override void WriteData(string prefix, List<StringPair> pairs)
+            {
+                Panel.SetOrAddKey(prefix + "_Value", Value, pairs);
+            }
+            public override void FindData(List<FrameworkElement> children)
+            {
+                Value = FindInt32("waterConditionValue", children, Value);
+            }
         }
         public class NPCPlayerLifeVirusConditionData : NPCConditionData
         {
@@ -732,6 +1840,19 @@ public struct BlueprintData
             {
                 Value = file.GetIntegerType(prefix + "_Value");
             }
+            public NPCPlayerLifeVirusConditionData() { }
+            public override void AddChildren(Grid parent, ref int row, List<FrameworkElement> childrenList)
+            {
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Virus Value:", "virusConditionValue", Value.ToString(AssetFile.Locale));
+            }
+            public override void WriteData(string prefix, List<StringPair> pairs)
+            {
+                Panel.SetOrAddKey(prefix + "_Value", Value, pairs);
+            }
+            public override void FindData(List<FrameworkElement> children)
+            {
+                Value = FindInt32("virusConditionValue", children, Value);
+            }
         }
         public class NPCHolidayConditionData : NPCConditionData
         {
@@ -739,6 +1860,19 @@ public struct BlueprintData
             public NPCHolidayConditionData(AssetFile file, string prefix)
             {
                 Holiday = file.GetEnumType(prefix + "_Value", ENPCHoliday.NONE);
+            }
+            public NPCHolidayConditionData() { }
+            public override void AddChildren(Grid parent, ref int row, List<FrameworkElement> childrenList)
+            {
+                AddEnumDropdown<ENPCHoliday>(parent, ref row, childrenList, "Holiday:", "holidayConditionHoliday", null, Holiday);
+            }
+            public override void WriteData(string prefix, List<StringPair> pairs)
+            {
+                Panel.SetOrAddEnumKey(prefix + "_Value", Holiday, pairs);
+            }
+            public override void FindData(List<FrameworkElement> children)
+            {
+                Holiday = FindEnum("holidayConditionHoliday", children, Holiday);
             }
         }
         public class NPCPlayerKillsConditionData : NPCConditionData
@@ -749,6 +1883,22 @@ public struct BlueprintData
             {
                 ID = file.GetUShortType(prefix + "_ID");
                 Threshold = file.GetShortType(prefix + "_Value");
+            }
+            public NPCPlayerKillsConditionData() { }
+            public override void AddChildren(Grid parent, ref int row, List<FrameworkElement> childrenList)
+            {
+                AddTextBoxAndLabel(parent, ref row, childrenList, "ID:", "playerKillsConditionID", ID.ToString(AssetFile.Locale));
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Threshold:", "playerKillsConditionValue", Threshold.ToString(AssetFile.Locale));
+            }
+            public override void WriteData(string prefix, List<StringPair> pairs)
+            {
+                Panel.SetOrAddKey(prefix + "_ID", ID, pairs);
+                Panel.SetOrAddKey(prefix + "_Value", Threshold, pairs);
+            }
+            public override void FindData(List<FrameworkElement> children)
+            {
+                ID = FindUInt16("playerKillsConditionID", children, ID);
+                Threshold = FindInt16("playerKillsConditionValue", children, Threshold);
             }
         }
         public class NPCObjectKillsConditionData : NPCConditionData
@@ -764,6 +1914,28 @@ public struct BlueprintData
                 ObjectGUID = file.GetGUIDType(prefix + "_Object");
                 Nav = file.GetByteType(prefix + "_Nav", byte.MaxValue);
             }
+            public NPCObjectKillsConditionData() { }
+            public override void AddChildren(Grid parent, ref int row, List<FrameworkElement> childrenList)
+            {
+                AddTextBoxAndLabel(parent, ref row, childrenList, "ID:", "objectKillsConditionID", ID.ToString(AssetFile.Locale));
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Threshold:", "objectKillsConditionValue", Threshold.ToString(AssetFile.Locale));
+                AddAssetReferenceGUID(parent, ref row, childrenList, "Object GUID:", "objectKillsConditionGuid", EAssetCategory.OBJECT, EAssetType.UNKNOWN, ObjectGUID);
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Nav:", "objectKillsConditionNav", Nav.ToString(AssetFile.Locale));
+            }
+            public override void WriteData(string prefix, List<StringPair> pairs)
+            {
+                Panel.SetOrAddKey(prefix + "_ID", ID, pairs);
+                Panel.SetOrAddKey(prefix + "_Value", Threshold, pairs);
+                Panel.SetOrAddKey(prefix + "_Value", ObjectGUID, pairs);
+                Panel.SetOrAddKey(prefix + "_Nav", Nav, pairs);
+            }
+            public override void FindData(List<FrameworkElement> children)
+            {
+                ID = FindUInt16("objectKillsConditionID", children, ID);
+                Threshold = FindInt16("objectKillsConditionValue", children, Threshold);
+                ObjectGUID = FindAsset("objectKillsConditionGuid", children, ObjectGUID);
+                Nav = FindUInt8("objectKillsConditionValue", children, Nav);
+            }
         }
         public class NPCCurrencyConditionData : NPCConditionData
         {
@@ -773,6 +1945,22 @@ public struct BlueprintData
             {
                 CurrencyItemGUID = file.GetGUIDType(prefix + "_GUID");
                 Threshold = file.GetUIntegerType(prefix + "_Value");
+            }
+            public NPCCurrencyConditionData() { }
+            public override void AddChildren(Grid parent, ref int row, List<FrameworkElement> childrenList)
+            {
+                AddAssetReferenceGUID(parent, ref row, childrenList, "Currency GUID:", "currencyConditionGuid", EAssetCategory.ITEM, EAssetType.Supply, CurrencyItemGUID);
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Threshold:", "currencyConditionValue", Threshold.ToString(AssetFile.Locale));
+            }
+            public override void WriteData(string prefix, List<StringPair> pairs)
+            {
+                Panel.SetOrAddKey(prefix + "_GUID", CurrencyItemGUID, pairs);
+                Panel.SetOrAddKey(prefix + "_Value", Threshold, pairs);
+            }
+            public override void FindData(List<FrameworkElement> children)
+            {
+                CurrencyItemGUID = FindAsset("currencyConditionGuid", children, CurrencyItemGUID);
+                Threshold = FindUInt32("currencyConditionValue", children, Threshold);
             }
         }
         public class NPCTreeKillsConditionData : NPCConditionData
@@ -786,6 +1974,26 @@ public struct BlueprintData
                 Threshold = file.GetShortType(prefix + "_Value");
                 TreeGUID = file.GetGUIDType(prefix + "_Tree");
             }
+            public NPCTreeKillsConditionData() { }
+            public override void AddChildren(Grid parent, ref int row, List<FrameworkElement> childrenList)
+            {
+                AddTextBoxAndLabel(parent, ref row, childrenList, "ID:", "treeKillsConditionID", ID.ToString(AssetFile.Locale));
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Tree GUID:", "treeKillsConditionGuid", TreeGUID.ToString("N"));
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Threshold:", "treeKillsConditionValue", Threshold.ToString(AssetFile.Locale));
+            }
+            public override void WriteData(string prefix, List<StringPair> pairs)
+            {
+                Panel.SetOrAddKey(prefix + "_ID", ID, pairs);
+                Panel.SetOrAddKey(prefix + "_Value", Threshold, pairs);
+                Panel.SetOrAddKey(prefix + "_Tree", TreeGUID, pairs);
+            }
+            public override void FindData(List<FrameworkElement> children)
+            {
+                if (Guid.TryParse(FindString("treeKillsConditionGuid", children, TreeGUID.ToString("N")), out Guid n))
+                    TreeGUID = n;
+                ID = FindUInt16("treeKillsConditionID", children, ID);
+                Threshold = FindInt16("treeKillsConditionValue", children, Threshold);
+            }
         }
         public class NPCWeatherStatusConditionData : NPCConditionData
         {
@@ -796,6 +2004,23 @@ public struct BlueprintData
                 WeatherGUID = file.GetGUIDType(prefix + "_GUID");
                 WeatherType = file.GetEnumType(prefix + "_Value", ENPCWeatherStatus.Active);
             }
+            public NPCWeatherStatusConditionData() { }
+            public override void AddChildren(Grid parent, ref int row, List<FrameworkElement> childrenList)
+            {
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Weather GUID:", "weatherStatusConditionGuid", WeatherGUID.ToString("N"));
+                AddEnumDropdown<ENPCWeatherStatus>(parent, ref row, childrenList, "Weather GUID:", "weatherStatusConditionType", null, WeatherType);
+            }
+            public override void WriteData(string prefix, List<StringPair> pairs)
+            {
+                Panel.SetOrAddKey(prefix + "_GUID", WeatherGUID, pairs);
+                Panel.SetOrAddEnumKey(prefix + "_Value", WeatherType, pairs);
+            }
+            public override void FindData(List<FrameworkElement> children)
+            {
+                if (Guid.TryParse(FindString("weatherStatusConditionGuid", children, WeatherGUID.ToString("N")), out Guid n))
+                    WeatherGUID = n;
+                WeatherType = FindEnum("weatherStatusConditionType", children, WeatherType);
+            }
         }
         public class NPCWeatherBlendAlphaConditionData : NPCConditionData
         {
@@ -805,6 +2030,23 @@ public struct BlueprintData
             {
                 WeatherGUID = file.GetGUIDType(prefix + "_GUID");
                 Threshold = file.GetFloatType(prefix + "_Value");
+            }
+            public NPCWeatherBlendAlphaConditionData() { }
+            public override void AddChildren(Grid parent, ref int row, List<FrameworkElement> childrenList)
+            {
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Weather GUID:", "weatherBlendConditionGuid", WeatherGUID.ToString("N"));
+                AddTextBoxAndLabel(parent, ref row, childrenList, "Lerp Alpha:", "weatherBlendConditionLerp", Threshold.ToString(AssetFile.Locale));
+            }
+            public override void WriteData(string prefix, List<StringPair> pairs)
+            {
+                Panel.SetOrAddKey(prefix + "_GUID", WeatherGUID, pairs);
+                Panel.SetOrAddKey(prefix + "_Value", Threshold, pairs);
+            }
+            public override void FindData(List<FrameworkElement> children)
+            {
+                if (Guid.TryParse(FindString("weatherBlendConditionGuid", children, WeatherGUID.ToString("N")), out Guid n))
+                    WeatherGUID = n;
+                Threshold = FindFloat("weatherBlendConditionLerp", children, Threshold);
             }
         }
         #endregion

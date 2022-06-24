@@ -12,10 +12,6 @@
         </Grid.ColumnDefinitions>
         <ScrollViewer HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" VerticalContentAlignment="Stretch" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <StackPanel Orientation="Horizontal" x:Name="StackPanel">
-                    <local:Blueprint />
-                    <local:Blueprint />
-                    <local:Blueprint />
-                    <local:Blueprint />
             </StackPanel>
         </ScrollViewer>
     </Grid>
